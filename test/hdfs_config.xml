@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+  <property>
+    <name>fs.default.name</name>
+    <value>hdfs://zedoop/</value>
+  </property>
+  <property>
+    <name>mapred.job.tracker</name>
+    <value>hdp01.zemanta.com:8021</value>
+  </property>
+</configuration>
+
