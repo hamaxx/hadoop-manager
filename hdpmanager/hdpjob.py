@@ -3,6 +3,7 @@ import re
 
 import subprocess
 
+from hdpenv import HadoopEnv
 
 EGG_NAME = 'zemanta_hadoop_job'
 EGG_VERSION = '1.0'
@@ -16,7 +17,7 @@ HADOOP_STREAMING_JAR_RE = re.compile(r'^hadoop.*streaming.*\.jar$')
 
 class HadoopJob(object):
 
-	def __init__(self, hdp_manager, input_paths, output_path, hadoop_env, mapper, reducer=None, combiner=None, num_reducers=None):
+	def __init__(self, hdp_manager, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, job_env=None):
 
 		self._hdpm = hdp_manager
 
@@ -28,7 +29,7 @@ class HadoopJob(object):
 		self._reducer = reducer
 		self._num_reducers = num_reducers or DEFAUT_NUM_REDUCERS
 
-		self._hadoop_env = hadoop_env
+		self._hadoop_env = HadoopEnv(module_paths=[self._mapper, self._reducer, self._combiner], **(job_env or {}))
 
 	def _get_streamer_command(self, module_path, encoded):
 		path = module_path.split('.')

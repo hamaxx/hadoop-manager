@@ -40,9 +40,8 @@ if __name__ == "__main__":
 
 			mapper='test.run_job.MyMapper',
 			reducer='test.run_job.MyReducer',
-			num_reducers=1,
-
-			setup=dict(packages=['test'])
+			combiner='test.run_job.MyReducer',
+			num_reducers=1
 		)
 
 	job.rm_output()

@@ -2,8 +2,9 @@ import os
 import re
 
 from hdpenv import HadoopEnv
+
 from hdpjob import HadoopJob
-from hadpfs import HadoopFs
+from hdpfs import HadoopFs
 
 HADOOP_STREAMING_JAR_RE = re.compile(r'^hadoop.*streaming.*\.jar$')
 
@@ -42,7 +43,5 @@ class HadoopManager(object):
 			print o,
 		print
 
-	def create_job(self, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, setup=None):
-		hadoop_env = HadoopEnv(**(setup or {}))
-
-		return HadoopJob(self, input_paths, output_path, hadoop_env, mapper, reducer, combiner, num_reducers)
+	def create_job(self, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, job_env=None):
+		return HadoopJob(self, input_paths, output_path, mapper, reducer, combiner, num_reducers, job_env)
