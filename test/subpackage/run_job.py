@@ -1,6 +1,3 @@
-import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
-
 import simplejson as json
 
 from hdpmanager import HadoopManager
