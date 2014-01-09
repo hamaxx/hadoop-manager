@@ -3,42 +3,53 @@ import sys
 import collections
 import atexit
 
-FLUSH_INTERVAL = 1000
+FLUSH_INTERVAL_FILE = 1000
+FLUSH_INTERVAL_TERMINAL = 10
+
 COMMA_REPLACE_CHARACTER = ';'
-IS_TERMINAL = os.isatty(sys.stderr.fileno())
 
-counters = collections.defaultdict(int)
 
-def flush_file(counter=None, clear=True):
-	if counter is None:
-		for counter in counters.iterkeys():
-			flush_file(counter)
-		return
+class Counter(object):
 
-	if counters[counter] > 0:
-		name = counter.replace(',', COMMA_REPLACE_CHARACTER)
-		sys.stderr.write('reporter:counter:%s,%s\n' % (name, counters[counter]))
-		counters[counter] = 0
+	def __init__(self, group='hdp'):
+		self._counters = collections.defaultdict(int)
 
-def flush_terminal(counter=None, clear=True):
-	for counter in counters.iterkeys():
-		name = counter.replace(',', COMMA_REPLACE_CHARACTER)
-		sys.stderr.write('counter:%s,%s\n' % (name, counters[counter]))
-	if clear:
-		sys.stderr.write('\033[%dA' % (len(counters) + 1))
+		self._group = group
 
-def count(counter, amount=1):
-	current_value = counters[counter]
-	new_value = current_value + amount
-	counters[counter] = new_value
-	if new_value / FLUSH_INTERVAL > current_value / FLUSH_INTERVAL:
-		if IS_TERMINAL:
-			flush_terminal(counter, clear=False)
+		self._is_terminal = os.isatty(sys.stderr.fileno())
+		if self._is_terminal:
+			self._flush_interval = FLUSH_INTERVAL_TERMINAL
+			atexit.register(self._flush_terminal, clear=False)
 		else:
-			flush_file(counter)
+			self._flush_interval = FLUSH_INTERVAL_FILE
+			atexit.register(self._flush_file)
 
-if IS_TERMINAL:
-	atexit.register(flush_terminal, clear=False)
-else:
-	atexit.register(flush_file)
+	def _flush_file(self, counter=None, clear=True):
+		if counter is None:
+			for counter in self._counters.iterkeys():
+				self._flush_file(counter)
+			return
+
+		if self._counters[counter] > 0:
+			name = counter.replace(',', COMMA_REPLACE_CHARACTER)
+			sys.stderr.write('reporter:counter:%s,%s,%s\n' % (self._group, name, self._counters[counter]))
+			self._counters[counter] = 0
+
+	def _flush_terminal(self, counter=None, clear=True):
+		for counter in self._counters.iterkeys():
+			name = counter.replace(',', COMMA_REPLACE_CHARACTER)
+			sys.stderr.write('counter:%s,%s,%s\n' % (self._group, name, self._counters[counter]))
+		if clear:
+			sys.stderr.write('\033[%dA' % (len(self._counters) + 1))
+
+	def count(self, counter, amount=1):
+		current_value = self._counters[counter]
+		new_value = current_value + amount
+		self._counters[counter] = new_value
+		if new_value / self._flush_interval > current_value / self._flush_interval:
+			if self._is_terminal:
+				self._flush_terminal(counter, clear=False)
+			else:
+				self._flush_file(counter)
+
 

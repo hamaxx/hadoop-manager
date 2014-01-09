@@ -17,6 +17,7 @@ HADOOP_STREAMING_JAR_RE = re.compile(r'^hadoop.*streaming.*\.jar$')
 
 CONF_PICKE_FILE_PATH = 'streamer_conf.pickle'
 
+
 class HadoopJob(object):
 
 	def __init__(self, hdp_manager, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, job_env=None, conf=None):
@@ -118,8 +119,6 @@ class HadoopJob(object):
 
 		if self._conf_file:
 			cmd += ['-file', self._conf_file]
-
-		print cmd
 
 		hadoop = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1)
 		self._hdpm._print_lines(hadoop.stdout)

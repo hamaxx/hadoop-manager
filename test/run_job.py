@@ -1,18 +1,15 @@
-import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
-
 import simplejson as json
 
 from hdpmanager import HadoopManager
 from hdpmanager.mapper import Mapper
 from hdpmanager.reducer import Reducer
 
-
 class MyMapper(Mapper):
 
 	def map(self, line):
+		self.count('map_lalala', 1)
+
 		decoded = json.loads(line)
-		self.count('map', 1)
 
 		campaign = decoded['DATA']['campaign_id']
 		cpc = decoded['DATA']['campaign_settings']['cpc_cc']
@@ -22,7 +19,8 @@ class MyMapper(Mapper):
 class MyReducer(Reducer):
 
 	def reduce(self, key, values):
-		self.count('reduce', 1)
+		self.count('reduce_lalala', 1)
+
 		values = map(lambda x: float(x), values)
 		return key, float(sum(values)) / 10000
 
