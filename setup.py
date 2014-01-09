@@ -18,4 +18,4 @@ setup(name='hadoop-manager',
       packages=['hdpmanager',],
       long_description=__doc__,
       platforms='any',
-      zip_safe=True)
+      zip_safe=False)

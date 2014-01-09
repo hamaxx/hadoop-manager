@@ -12,14 +12,14 @@ class HadoopEnv(object):
 
 	def __init__(self, packages=None, package_data=None, requires=None, module_paths=None):
 
-		self._packages = [ZHDUTILS_PACKAGE]
-		if packages:
-			self._packages += packages
+		self._packages = packages or []
 		if module_paths:
 			self._packages += self._get_packages_from_module_paths(module_paths)
 
 		self._package_data = package_data
-		self._requires = requires
+
+		self._requires = requires or []
+		self._requires += [ZHDUTILS_PACKAGE]
 
 		self.env_files = self._package()
 
@@ -53,8 +53,6 @@ class HadoopEnv(object):
 			attrs['packages'] = self._packages
 		if self._package_data:
 			attrs['package_data'] = self._package_data
-		#if self._requires:
-		#	attrs['install_requires'] = self._requires
 
 		dist = setuptools.Distribution(attrs)
 		dist.run_command('bdist_egg')
@@ -71,11 +69,14 @@ class HadoopEnv(object):
 		packages = []
 		for module in self._requires:
 			mod = importlib.import_module(module)
-			if not mod.__package__:
-				packages.append((os.path.basename(mod.__file__), mod.__file__))
-			else:
-				shutil.make_archive('dist/%s' % mod.__package__, 'zip', os.path.normpath(os.path.join(mod.__path__[0], '..')), mod.__package__)
+
+			path = mod.__path__[0]
+
+			if os.path.isdir(path):
+				shutil.make_archive('dist/%s' % mod.__package__, 'zip', os.path.normpath(os.path.join(path, '..')), mod.__package__)
 				fname = 'dist/%s.zip' % mod.__package__
 				dname = 'lib/%s.zip' % mod.__package__
 				packages.append((dname, fname))
+			else:
+				packages.append((os.path.basename(mod.__file__), mod.__file__))
 		return packages
