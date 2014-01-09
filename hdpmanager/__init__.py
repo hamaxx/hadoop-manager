@@ -1,10 +1,8 @@
 import os
 import re
 
-from hdpenv import HadoopEnv
-
-from hdpjob import HadoopJob
-from hdpfs import HadoopFs
+from hdpmanager.hdpjob import HadoopJob
+from hdpmanager.hdpfs import HadoopFs
 
 HADOOP_STREAMING_JAR_RE = re.compile(r'^hadoop.*streaming.*\.jar$')
 

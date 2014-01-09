@@ -1,7 +1,7 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-import json
+import simplejson as json
 
 from hdpmanager import HadoopManager
 from hdpmanager.mapper import Mapper
@@ -23,7 +23,7 @@ class MyReducer(Reducer):
 
 	def reduce(self, key, values):
 		self.count('reduce', 1)
-		values = map(lambda x: int(x), values)
+		values = map(lambda x: float(x), values)
 		return key, float(sum(values)) / 10000
 
 
@@ -41,7 +41,9 @@ if __name__ == "__main__":
 			mapper='test.run_job.MyMapper',
 			reducer='test.run_job.MyReducer',
 			combiner='test.run_job.MyReducer',
-			num_reducers=1
+			num_reducers=1,
+
+			job_env=dict(requires=['simplejson'])
 		)
 
 	job.rm_output()

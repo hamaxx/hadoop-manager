@@ -48,7 +48,9 @@ class HadoopJob(object):
 		return self._get_streamer_command(self._reducer, encoded)
 
 	def run_local(self):
-		env = {'PYTHONPATH': os.path.abspath(self._hadoop_env.env_files[1])}
+		env_files = self._hadoop_env.env_files
+
+		env = {'PYTHONPATH': 'PYTHONPATH=:%s' % (os.pathsep.join([e[1] for e in env_files]))}
 
 		mapper = subprocess.Popen(self._get_mapper_command(False), env=env, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 
@@ -68,8 +70,8 @@ class HadoopJob(object):
 
 			out_stream = reducer.stdout.read()
 
-		with self._output_path as of:
-			out_stream.write(of)
+		with open(self._output_path, 'w') as of:
+			of.write(out_stream)
 
 	def rm_output(self):
 		cmd = [self._hdpm._hadoop_bin, 'fs',
@@ -80,20 +82,20 @@ class HadoopJob(object):
 		self._hdpm._print_lines(hadoop.stdout)
 
 	def run(self):
-		egg = self._hadoop_env.env_files
+		env_files = self._hadoop_env.env_files
 
 		cmd = [self._hdpm._hadoop_bin, 'jar', self._hdpm._hadoop_stream_jar,
 			'-conf', self._hdpm._hadoop_config,
 			'-mapper', self._get_mapper_command(),
-			'-file', egg[1],
-			'-cmdenv', 'PYTHONPATH=%s' % egg[0],
 			'-output', self._output_path,
 		]
 
+		for efile in env_files:
+			cmd += ['-file', efile[1]]
+		cmd += ['-cmdenv', 'PYTHONPATH=:%s' % (os.pathsep.join([e[0] for e in env_files]))]
+
 		for path in self._input_paths:
 			cmd += ['-input', path]
-
-		cmd += []
 
 		if self._reducer:
 			cmd += ['-reducer', self._get_reducer_command(),
