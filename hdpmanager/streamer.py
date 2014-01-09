@@ -1,7 +1,9 @@
+import os
 import sys
+import pickle
 
 from counter import count
-
+from hdpjob import CONF_PICKE_FILE_PATH 
 
 class Streamer(object):
 
@@ -9,7 +11,14 @@ class Streamer(object):
 		self._input_stream = input_stream
 		self._output_stream = output_stream
 
+		self.conf = self._get_env_conf()
+
 		self.count = count
+
+	def _get_env_conf(self):
+		if not os.path.exists(CONF_PICKE_FILE_PATH):
+			return
+		return pickle.load(open(CONF_PICKE_FILE_PATH))
 
 	def _out(self, outputs):
 		if not outputs:

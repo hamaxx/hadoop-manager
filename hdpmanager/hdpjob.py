@@ -1,5 +1,6 @@
 import os
 import re
+import pickle
 
 import subprocess
 
@@ -14,10 +15,11 @@ DEFAUT_NUM_REDUCERS = 10
 
 HADOOP_STREAMING_JAR_RE = re.compile(r'^hadoop.*streaming.*\.jar$')
 
+CONF_PICKE_FILE_PATH = 'streamer_conf.pickle'
 
 class HadoopJob(object):
 
-	def __init__(self, hdp_manager, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, job_env=None):
+	def __init__(self, hdp_manager, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, job_env=None, conf=None):
 
 		self._hdpm = hdp_manager
 
@@ -29,7 +31,17 @@ class HadoopJob(object):
 		self._reducer = reducer
 		self._num_reducers = num_reducers or DEFAUT_NUM_REDUCERS
 
+		self._conf = conf
+		self._conf_file = self._create_conf_file(conf)
+
 		self._hadoop_env = HadoopEnv(module_paths=[self._mapper, self._reducer, self._combiner], **(job_env or {}))
+
+	def _create_conf_file(self, conf):
+		if not conf:
+			return
+
+		pickle.dump(conf, open(CONF_PICKE_FILE_PATH, 'w'))
+		return CONF_PICKE_FILE_PATH
 
 	def _get_streamer_command(self, module_path, encoded):
 		path = module_path.split('.')
@@ -103,6 +115,11 @@ class HadoopJob(object):
 
 		if self._combiner:
 			cmd += ['-combiner', self._get_reducer_command()]
+
+		if self._conf_file:
+			cmd += ['-file', self._conf_file]
+
+		print cmd
 
 		hadoop = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1)
 		self._hdpm._print_lines(hadoop.stdout)

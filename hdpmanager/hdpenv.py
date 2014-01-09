@@ -60,32 +60,40 @@ class HadoopEnv(object):
 
 		return [(egg_filename, 'dist/' + egg_filename)]
 
-	def _package_requires(self):
-		# Prototype. Should work sometimes.
-
+	def _get_module_package(self, module):
 		import importlib
 		import shutil
 
+		mod = importlib.import_module(module)
+
+		try:
+			path = mod.__path__[0]
+		except AttributeError:
+			path = mod.__file__
+
+		if os.path.isdir(path):	# Package in a folder
+			shutil.make_archive('dist/%s' % mod.__package__, 'zip', os.path.normpath(os.path.join(path, '..')), mod.__package__)
+			fname = 'dist/%s.zip' % mod.__package__
+			dname = 'lib/%s.zip' % mod.__package__
+			return dname, fname
+
+		elif os.path.splitext(os.path.normpath(os.path.join(path, '..')))[1] == '.egg': # Package in an egg
+			egg_path = os.path.normpath(os.path.join(path, '..'))
+			return os.path.basename(egg_path), egg_path
+
+		elif os.path.splitext(path)[1] == '.so': # Binary module
+			return os.path.basename(path), path
+
+		raise Exception('Unsupported package type')
+
+	def _package_requires(self):
+		# Prototype. Should work sometimes.
+
 		packages = []
 		for module in self._requires:
-			mod = importlib.import_module(module)
-
-			try:
-				path = mod.__path__[0]
-			except AttributeError:
-				path = mod.__file__
-
-			if os.path.isdir(path):	# Package in a folder
-				shutil.make_archive('dist/%s' % mod.__package__, 'zip', os.path.normpath(os.path.join(path, '..')), mod.__package__)
-				fname = 'dist/%s.zip' % mod.__package__
-				dname = 'lib/%s.zip' % mod.__package__
-				packages.append((dname, fname))
-
-			elif os.path.splitext(os.path.normpath(os.path.join(path, '..')))[1] == '.egg': # Package in an egg
-				egg_path = os.path.normpath(os.path.join(path, '..'))
-				packages.append((os.path.basename(egg_path), egg_path))
-
-			elif os.path.splitext(path)[1] == '.so': # Binary module
-				packages.append((os.path.basename(path), path))
+			if isinstance(module, (unicode, str)):
+				packages.append(self._get_module_package(module))
+			else:
+				raise Exception('Invalid requirement parameter')
 
 		return packages

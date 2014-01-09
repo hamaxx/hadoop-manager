@@ -8,13 +8,8 @@ from hdpmanager.reducer import Reducer
 class MyMapper(Mapper):
 
 	def map(self, line):
-		decoded = json.loads(line)
-		self.count('map', 1)
-
-		campaign = decoded['DATA']['campaign_id']
-		cpc = decoded['DATA']['campaign_settings']['cpc_cc']
-
-		return campaign, cpc
+		test = self.conf['test']
+		return test, 1
 
 class MyReducer(Reducer):
 
@@ -39,6 +34,8 @@ if __name__ == "__main__":
 			reducer='subpackage.run_job.MyReducer',
 			combiner='subpackage.run_job.MyReducer',
 			num_reducers=1,
+
+			conf=dict(test=12345),
 
 			job_env=dict(requires=['simplejson'])
 		)
