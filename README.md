@@ -1,5 +1,4 @@
-dsd
-ds
-d
-sd
+hadoop-manager
+====
 
+Python wrapper around Hadoop streaming jar.
