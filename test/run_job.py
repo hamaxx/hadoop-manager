@@ -14,7 +14,7 @@ class MyMapper(Mapper):
 		campaign = decoded['DATA']['campaign_id']
 		cpc = decoded['DATA']['campaign_settings']['cpc_cc']
 
-		return campaign, cpc
+		yield campaign, cpc
 
 class MyReducer(Reducer):
 
@@ -22,7 +22,7 @@ class MyReducer(Reducer):
 		self.count('reduce_lalala', 1)
 
 		values = map(lambda x: float(x), values)
-		return key, float(sum(values)) / 10000
+		yield key, float(sum(values)) / 10000
 
 
 if __name__ == "__main__":

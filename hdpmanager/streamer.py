@@ -1,6 +1,7 @@
 import os
 import sys
 import pickle
+import json
 
 from counter import Counter
 from hdpjob import CONF_PICKE_FILE_PATH
@@ -21,15 +22,31 @@ class Streamer(object):
 			return
 		return pickle.load(open(CONF_PICKE_FILE_PATH))
 
+	def _encode_component(self, comp):
+		if comp is None:
+			return str(None)
+		if isinstance(comp, str):
+			return comp
+		if isinstance(comp, unicode):
+			return comp.encode('ascii', errors='replace')
+		if isinstance(comp, (int, long,  float)):
+			return str(comp)
+
+		return json.dumps(comp)
+
 	def _out(self, outputs):
 		if not outputs:
 			return
 
-		if not isinstance(outputs, (list, tuple)):
+		if isinstance(outputs, tuple):
 			outputs = [outputs]
 
-		output = '\t'.join(map(lambda x: str(x), outputs))
-		self._output_stream.write(output + '\n')
+		for output in outputs:
+			if not isinstance(output, tuple):
+				raise Exception('Invalid output')
+
+			output_str = '\t'.join(map(lambda x: self._encode_component(x), output))
+			self._output_stream.write(output_str + '\n')
 
 	def _run(self):
 		self.parse_input()
