@@ -142,3 +142,6 @@ class HadoopJob(object):
 		hadoop = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1)
 		self._hdpm._print_lines(hadoop.stdout)
 
+		hadoop.wait()
+		if hadoop.returncode != 0:
+			raise Exception('Hadoop streaming command failed!')
