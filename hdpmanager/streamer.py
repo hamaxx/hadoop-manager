@@ -19,11 +19,7 @@ class pickleBase64(object):
 	def dumps(self, o):
 		return binascii.b2a_base64(pickle.dumps(o, -1)).rstrip() # faster than base64 module
 	def loads(self, s):
-		try:
-			return pickle.loads(binascii.a2b_base64(s))
-		except:
-			sys.stderr.write('11 ' + s + ' 11')
-			raise
+		return pickle.loads(binascii.a2b_base64(s))
 
 serializer_objects = {
 	'json' : json,
