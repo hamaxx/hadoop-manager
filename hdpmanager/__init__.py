@@ -41,5 +41,5 @@ class HadoopManager(object):
 			print o,
 		print
 
-	def create_job(self, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, serialization=None, job_env=None, conf=None):
-		return HadoopJob(self, input_paths, output_path, mapper, reducer, combiner, num_reducers, serialization, job_env, conf)
+	def create_job(*args, **kwargs):
+		return HadoopJob(*args, **kwargs)

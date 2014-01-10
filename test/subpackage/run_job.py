@@ -1,6 +1,3 @@
-import simplejson as json
-import msgpack
-
 from hdpmanager import HadoopManager
 from hdpmanager.mapper import Mapper
 from hdpmanager.reducer import Reducer
@@ -28,12 +25,14 @@ if __name__ == "__main__":
 
 	mng = HadoopManager(
 			hadoop_home='/opt/cloudera/parcels/CDH-4.2.0-1.cdh4.2.0.p0.10',
-			hadoop_config='hdfs_config.xml'
+			hadoop_config='test/hdfs_config.xml'
 		)
 
 	job = mng.create_job(
 			input_paths=['/user/ham/clicks-2013-12-06_00016.tmp'],
 			output_path='/user/ham/out.txt',
+
+			root_package='test',
 
 			mapper='subpackage.run_job.MyMapper',
 			reducer='subpackage.run_job.MyReducer',
@@ -42,9 +41,12 @@ if __name__ == "__main__":
 
 			conf=dict(test=12345),
 
-			job_env=dict(requires=['simplejson', 'msgpack'])
+			job_env=dict(requires=['simplejson'])
 		)
 
 	job.rm_output()
 	job.run()
 
+	#job._input_paths = ['test/test_in.json']
+	#job._output_path = 'out.txt'
+	#job.run_local()

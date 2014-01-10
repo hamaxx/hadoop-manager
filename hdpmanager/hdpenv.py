@@ -10,7 +10,9 @@ ZHDUTILS_PACKAGE = 'hdpmanager'
 
 class HadoopEnv(object):
 
-	def __init__(self, packages=None, package_data=None, requires=None, module_paths=None):
+	def __init__(self, packages=None, package_data=None, requires=None, module_paths=None, root_package=None):
+
+		self._root_package = root_package
 
 		self._packages = packages or []
 		if not packages and module_paths:
@@ -23,6 +25,18 @@ class HadoopEnv(object):
 
 		self.env_files = self._package()
 
+	def _setup_working_dir(self):
+		import importlib
+
+		if not self._root_package:
+			return
+
+		sys.path.insert(0, os.getcwd())
+		mod = importlib.import_module('test')
+		path = os.path.abspath(mod.__path__[0])
+
+		os.chdir(path)
+
 	def _get_packages_from_module_paths(self, module_paths):
 		packages = set()
 		for path in module_paths:
@@ -31,8 +45,13 @@ class HadoopEnv(object):
 		return list(packages)
 
 	def _package(self):
+		cwd = os.getcwd()
+		self._setup_working_dir()
+
 		packaged_egg = self._build_egg()
 		packaged_requires = self._package_requires()
+
+		os.chdir(cwd)
 
 		return packaged_requires + packaged_egg
 
@@ -58,7 +77,7 @@ class HadoopEnv(object):
 		egg_python_version = '%s.%s' % (sys.version_info.major, sys.version_info.minor)
 		egg_filename = '%s-%s-py%s.egg' % (EGG_NAME, EGG_VERSION, egg_python_version)
 
-		return [(egg_filename, 'dist/' + egg_filename)]
+		return [(egg_filename, os.path.abspath('dist/' + egg_filename))]
 
 	def _get_module_package(self, module):
 		import importlib
@@ -75,14 +94,14 @@ class HadoopEnv(object):
 			shutil.make_archive('dist/%s' % mod.__package__, 'zip', os.path.normpath(os.path.join(path, '..')), mod.__package__)
 			fname = 'dist/%s.zip' % mod.__package__
 			dname = 'lib/%s.zip' % mod.__package__
-			return dname, fname
+			return dname, os.path.abspath(fname)
 
 		elif os.path.splitext(os.path.normpath(os.path.join(path, '..')))[1] == '.egg': # Package in an egg
 			egg_path = os.path.normpath(os.path.join(path, '..'))
 			return os.path.basename(egg_path), egg_path
 
 		elif os.path.splitext(path)[1] == '.so': # Binary module
-			return os.path.basename(path), path
+			return os.path.basename(path), os.path.abspath(path)
 
 		raise Exception('Unsupported package type')
 

@@ -20,25 +20,27 @@ SERIALIZATION_CONF_PICKE_FILE_PATH = 'serialization_conf.pickle'
 
 class HadoopJob(object):
 
-	def __init__(self, hdp_manager, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, serializaton=None, job_env=None, conf=None):
+	def __init__(self, hdp_manager, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, serialization=None, job_env=None, conf=None, root_package=None):
 
 		self._hdpm = hdp_manager
 
 		self._input_paths = input_paths
 		self._output_path = output_path
 
+		self._root_package = root_package
+
 		self._mapper = mapper
 		self._combiner = combiner
 		self._reducer = reducer
 		self._num_reducers = num_reducers or DEFAUT_NUM_REDUCERS
 
-		self._serialization_conf = serializaton
-		self._serialization_conf_file = self._create_conf_file(serializaton, SERIALIZATION_CONF_PICKE_FILE_PATH)
+		self._serialization_conf = serialization
+		self._serialization_conf_file = self._create_conf_file(serialization, SERIALIZATION_CONF_PICKE_FILE_PATH)
 
 		self._conf = conf
 		self._conf_file = self._create_conf_file(conf, CONF_PICKE_FILE_PATH)
 
-		self._hadoop_env = HadoopEnv(module_paths=[self._mapper, self._reducer, self._combiner], **(job_env or {}))
+		self._hadoop_env = HadoopEnv(root_package=self._root_package, module_paths=[self._mapper, self._reducer, self._combiner], **(job_env or {}))
 
 	def _create_conf_file(self, conf, fp):
 		if not conf:
