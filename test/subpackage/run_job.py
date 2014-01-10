@@ -1,8 +1,10 @@
 import simplejson as json
+import msgpack
 
 from hdpmanager import HadoopManager
 from hdpmanager.mapper import Mapper
 from hdpmanager.reducer import Reducer
+from hdpmanager.combiner import Combiner
 
 
 class MyMapper(Mapper):
@@ -18,6 +20,9 @@ class MyReducer(Reducer):
 		values = map(lambda x: float(x), values)
 		return key, float(sum(values)) / 10000
 
+class MyCombiner(MyReducer, Combiner):
+	pass
+
 
 if __name__ == "__main__":
 
@@ -32,12 +37,12 @@ if __name__ == "__main__":
 
 			mapper='subpackage.run_job.MyMapper',
 			reducer='subpackage.run_job.MyReducer',
-			combiner='subpackage.run_job.MyReducer',
+			combiner='subpackage.run_job.MyCombiner',
 			num_reducers=1,
 
 			conf=dict(test=12345),
 
-			job_env=dict(requires=['simplejson'])
+			job_env=dict(requires=['simplejson', 'msgpack'])
 		)
 
 	job.rm_output()

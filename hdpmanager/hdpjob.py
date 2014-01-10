@@ -1,26 +1,26 @@
 import os
 import re
-import pickle
+import cPickle as pickle
 
 import subprocess
 
 from hdpenv import HadoopEnv
 
+ZHDUTILS_PACKAGE = 'hdpmanager'
 EGG_NAME = 'zemanta_hadoop_job'
 EGG_VERSION = '1.0'
-
-ZHDUTILS_PACKAGE = 'hdpmanager'
 
 DEFAUT_NUM_REDUCERS = 10
 
 HADOOP_STREAMING_JAR_RE = re.compile(r'^hadoop.*streaming.*\.jar$')
 
 CONF_PICKE_FILE_PATH = 'streamer_conf.pickle'
+SERIALIZATION_CONF_PICKE_FILE_PATH = 'serialization_conf.pickle'
 
 
 class HadoopJob(object):
 
-	def __init__(self, hdp_manager, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, job_env=None, conf=None):
+	def __init__(self, hdp_manager, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, serializaton=None, job_env=None, conf=None):
 
 		self._hdpm = hdp_manager
 
@@ -32,17 +32,20 @@ class HadoopJob(object):
 		self._reducer = reducer
 		self._num_reducers = num_reducers or DEFAUT_NUM_REDUCERS
 
+		self._serialization_conf = serializaton
+		self._serialization_conf_file = self._create_conf_file(serializaton, SERIALIZATION_CONF_PICKE_FILE_PATH)
+
 		self._conf = conf
-		self._conf_file = self._create_conf_file(conf)
+		self._conf_file = self._create_conf_file(conf, CONF_PICKE_FILE_PATH)
 
 		self._hadoop_env = HadoopEnv(module_paths=[self._mapper, self._reducer, self._combiner], **(job_env or {}))
 
-	def _create_conf_file(self, conf):
+	def _create_conf_file(self, conf, fp):
 		if not conf:
 			return
 
-		pickle.dump(conf, open(CONF_PICKE_FILE_PATH, 'w'))
-		return CONF_PICKE_FILE_PATH
+		pickle.dump(conf, open(fp, 'w'))
+		return fp
 
 	def _get_streamer_command(self, module_path, encoded):
 		path = module_path.split('.')
@@ -60,6 +63,9 @@ class HadoopJob(object):
 	def _get_reducer_command(self, encoded=True):
 		return self._get_streamer_command(self._reducer, encoded)
 
+	def _get_combiner_command(self, encoded=True):
+		return self._get_streamer_command(self._combiner, encoded)
+
 	def run_local(self):
 		env_files = self._hadoop_env.env_files
 
@@ -73,6 +79,15 @@ class HadoopJob(object):
 		mapper.stdin.close()
 
 		out_stream = mapper.stdout.read()
+
+		if self._combiner:
+			combiner = subprocess.Popen(self._get_combiner_command(False), env=env, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+
+			for line in sorted(out_stream.split('\n')):
+				combiner.stdin.write(line + '\n')
+			combiner.stdin.close()
+
+			out_stream = combiner.stdout.read()
 
 		if self._reducer:
 			reducer = subprocess.Popen(self._get_reducer_command(False), env=env, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -100,8 +115,7 @@ class HadoopJob(object):
 		cmd = [self._hdpm._hadoop_bin, 'jar', self._hdpm._hadoop_stream_jar,
 			'-conf', self._hdpm._hadoop_config,
 			'-mapper', self._get_mapper_command(),
-			'-output', self._output_path,
-		]
+			'-output', self._output_path,]
 
 		for efile in env_files:
 			cmd += ['-file', efile[1]]
@@ -112,13 +126,16 @@ class HadoopJob(object):
 
 		if self._reducer:
 			cmd += ['-reducer', self._get_reducer_command(),
-				'-numReduceTasks', str(self._num_reducers),]
+				'-numReduceTasks', str(self._num_reducers)]
 
 		if self._combiner:
-			cmd += ['-combiner', self._get_reducer_command()]
+			cmd += ['-combiner', self._get_combiner_command()]
 
 		if self._conf_file:
 			cmd += ['-file', self._conf_file]
+
+		if self._serialization_conf_file:
+			cmd += ['-file', self._serialization_conf_file]
 
 		hadoop = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1)
 		self._hdpm._print_lines(hadoop.stdout)
