@@ -32,7 +32,7 @@ class HadoopEnv(object):
 			return
 
 		sys.path.insert(0, os.getcwd())
-		mod = importlib.import_module('test')
+		mod = importlib.import_module(self._root_package)
 		path = os.path.abspath(mod.__path__[0])
 
 		os.chdir(path)
