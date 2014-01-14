@@ -1,18 +1,10 @@
 import os
 import sys
 import cPickle as pickle
-import binascii
-
-try:
-	try:
-		import ujson as json
-	except ImportError:
-		import simplejson as json
-except ImportError:
-	import json
 
 from counter import Counter
 from hdpjob import CONF_PICKE_FILE_PATH, SERIALIZATION_CONF_PICKE_FILE_PATH
+from protocol import JsonProtocol, PickleProtocol, RawProtocol
 
 
 DEFAULT_INPUT_SERIALIZED = 'json'
@@ -20,64 +12,14 @@ DEFAULT_OUTPUT_SERIALIZED = 'json'
 DEFAULT_INTER_SERIALIZED = 'pickle'
 
 
-class _CacheSerializer(object):
-
-	_cached_values = None
-
-	def __init__(self, serializer, count):
-		self._serializer = serializer
-		self.count = count
-
-		self._cached_values = {}
-
-	def dumps(self, o, cache_idx=-1):
-		if cache_idx < 0:
-			return self._serializer.dumps(o)
-
-		cached_value = self._cached_values.get(cache_idx)
-		if cached_value and cached_value[0] == o:
-			return cached_value[1]
-
-		dumps = self._serializer.dumps(o)
-		self._cached_values[cache_idx] = (o, dumps)
-
-		return dumps
-
-	def loads(self, s, cache_idx=-1):
-		if cache_idx < 0:
-			return self._serializer.loads(s)
-
-		cached_value = self._cached_values.get(cache_idx)
-		if cached_value and cached_value[1] == s:
-			return cached_value[0]
-
-		loads = self._serializer.loads(s)
-		self._cached_values[cache_idx] = (loads, s)
-
-		return loads
-
-
-class PickleEscaped(object):
-
-	def dumps(self, o):
-		return pickle.dumps(o).encode('string_escape')
-
-	def loads(self, s):
-		return pickle.loads(s.decode('string_escape'))
-
-class Json(object):
-
-	def dumps(self, o):
-		return json.dumps(o)
-
-	def loads(self, s):
-		return json.loads(s)
-
 class Streamer(object):
 
 	def __init__(self, input_stream=sys.stdin, output_stream=sys.stdout):
 		self._input_stream = input_stream
 		self._output_stream = output_stream
+
+		self._read_protocol = None
+		self._write_protocol = None
 
 		self.conf = self._get_env_conf(CONF_PICKE_FILE_PATH)
 
@@ -96,9 +38,9 @@ class Streamer(object):
 
 	def _parse_serializers(self):
 		serializer_objects = {
-			'json' : _CacheSerializer(Json(), self.count),
-			'pickle': _CacheSerializer(PickleEscaped(), self.count),
-			'raw': None,
+			'json' : JsonProtocol(),
+			'pickle': PickleProtocol(),
+			'raw': RawProtocol(),
 		}
 
 		ser_conf = self._get_env_conf(SERIALIZATION_CONF_PICKE_FILE_PATH) or {}
@@ -111,16 +53,6 @@ class Streamer(object):
 
 		self._set_serializers(serializers)
 
-	def _encode_component(self, comp, cache_idx=-1):
-		if not self._encoder:
-			return comp
-		return self._encoder.dumps(comp, cache_idx)
-
-	def _decode_component(self, comp, cache_idx=-1):
-		if not self._decoder:
-			return comp
-		return self._decoder.loads(comp, cache_idx)
-
 	def _out(self, outputs):
 		if not outputs:
 			return
@@ -132,7 +64,7 @@ class Streamer(object):
 			if not isinstance(output, tuple):
 				raise Exception('Invalid output')
 
-			output_serialized = [self._encode_component(x, cache_idx=i) for i, x in enumerate(output)]
+			output_serialized = [self._write_protocol.encode(x, cache_idx=i) for i, x in enumerate(output)]
 			output_str = '\t'.join(output_serialized)
 
 			self._output_stream.write(output_str + '\n')

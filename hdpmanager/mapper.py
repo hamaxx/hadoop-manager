@@ -6,14 +6,14 @@ from streamer import Streamer
 class Mapper(Streamer):
 
 	def _set_serializers(self, serializers):
-		self._decoder = serializers['input']
-		self._encoder = serializers['inter']
+		self._read_protocol = serializers['input']
+		self._write_protocol = serializers['inter']
 
 	def map(self, line):
 		return line
 
 	def parse_line(self, line):
-		return self._decode_component(line.rstrip('\t'))
+		return self._read_protocol.decode(line.rstrip())
 
 	def parse_input(self):
 		for line in self._input_stream:
