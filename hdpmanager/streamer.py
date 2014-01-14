@@ -15,17 +15,63 @@ from counter import Counter
 from hdpjob import CONF_PICKE_FILE_PATH, SERIALIZATION_CONF_PICKE_FILE_PATH
 
 
-class pickleBase64(object):
-	def dumps(self, o):
-		return binascii.b2a_base64(pickle.dumps(o, -1)).rstrip() # faster than base64 module
-	def loads(self, s):
-		return pickle.loads(binascii.a2b_base64(s))
+DEFAULT_INPUT_SERIALIZED = 'json'
+DEFAULT_OUTPUT_SERIALIZED = 'json'
+DEFAULT_INTER_SERIALIZED = 'pickle'
 
-serializer_objects = {
-	'json' : json,
-	'pickle': pickleBase64(),
-	'raw': None,
-}
+
+class _CacheSerializer(object):
+
+	_cached_values = None
+
+	def __init__(self, serializer, count):
+		self._serializer = serializer
+		self.count = count
+
+		self._cached_values = {}
+
+	def dumps(self, o, cache_idx=-1):
+		if cache_idx < 0:
+			return self._serializer.dumps(o)
+
+		cached_value = self._cached_values.get(cache_idx)
+		if cached_value and cached_value[0] == o:
+			return cached_value[1]
+
+		dumps = self._serializer.dumps(o)
+		self._cached_values[cache_idx] = (o, dumps)
+
+		return dumps
+
+	def loads(self, s, cache_idx=-1):
+		if cache_idx < 0:
+			return self._serializer.loads(s)
+
+		cached_value = self._cached_values.get(cache_idx)
+		if cached_value and cached_value[1] == s:
+			return cached_value[0]
+
+		loads = self._serializer.loads(s)
+		self._cached_values[cache_idx] = (loads, s)
+
+		return loads
+
+
+class PickleEscaped(object):
+
+	def dumps(self, o):
+		return pickle.dumps(o).encode('string_escape')
+
+	def loads(self, s):
+		return pickle.loads(s.decode('string_escape'))
+
+class Json(object):
+
+	def dumps(self, o):
+		return json.dumps(o)
+
+	def loads(self, s):
+		return json.loads(s)
 
 class Streamer(object):
 
@@ -35,10 +81,10 @@ class Streamer(object):
 
 		self.conf = self._get_env_conf(CONF_PICKE_FILE_PATH)
 
-		self._parse_serializers()
-
 		counter = Counter(self.__class__.__name__)
 		self.count = counter.count
+
+		self._parse_serializers()
 
 	def _get_env_conf(self, fn):
 		if not os.path.exists(fn):
@@ -49,23 +95,31 @@ class Streamer(object):
 		raise Exception('Must be implemented in Mapper/Reducer/Combiner')
 
 	def _parse_serializers(self):
-		ser_conf = self._get_env_conf(SERIALIZATION_CONF_PICKE_FILE_PATH) or {}
-		serializers = {
-			'input': serializer_objects.get(ser_conf.get('input', 'json')),
-			'output': serializer_objects.get(ser_conf.get('output', 'json')),
-			'inter': serializer_objects.get(ser_conf.get('inter', 'pickle')),
+		serializer_objects = {
+			'json' : _CacheSerializer(Json(), self.count),
+			'pickle': _CacheSerializer(PickleEscaped(), self.count),
+			'raw': None,
 		}
+
+		ser_conf = self._get_env_conf(SERIALIZATION_CONF_PICKE_FILE_PATH) or {}
+
+		serializers = {
+			'input': serializer_objects.get(ser_conf.get('input', DEFAULT_INPUT_SERIALIZED)),
+			'output': serializer_objects.get(ser_conf.get('output', DEFAULT_OUTPUT_SERIALIZED)),
+			'inter': serializer_objects.get(ser_conf.get('inter', DEFAULT_INTER_SERIALIZED)),
+		}
+
 		self._set_serializers(serializers)
 
-	def _encode_component(self, comp, serializer):
-		if not serializer:
+	def _encode_component(self, comp, cache_idx=-1):
+		if not self._encoder:
 			return comp
-		return serializer.dumps(comp)
+		return self._encoder.dumps(comp, cache_idx)
 
-	def _decode_component(self, comp, serializer):
-		if not serializer:
+	def _decode_component(self, comp, cache_idx=-1):
+		if not self._decoder:
 			return comp
-		return serializer.loads(comp)
+		return self._decoder.loads(comp, cache_idx)
 
 	def _out(self, outputs):
 		if not outputs:
@@ -78,7 +132,9 @@ class Streamer(object):
 			if not isinstance(output, tuple):
 				raise Exception('Invalid output')
 
-			output_str = '\t'.join(map(lambda x: self._encode_component(x, self._output_serializer), output))
+			output_serialized = [self._encode_component(x, cache_idx=i) for i, x in enumerate(output)]
+			output_str = '\t'.join(output_serialized)
+
 			self._output_stream.write(output_str + '\n')
 
 	def _run(self):

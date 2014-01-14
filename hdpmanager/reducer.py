@@ -7,8 +7,8 @@ from streamer import Streamer
 class Reducer(Streamer):
 
 	def _set_serializers(self, serializers):
-		self._input_serializer = serializers['inter']
-		self._output_serializer = serializers['output']
+		self._decoder = serializers['inter']
+		self._encoder = serializers['output']
 
 	def reduce(self, key, values):
 		return key, values
@@ -21,6 +21,13 @@ class Reducer(Streamer):
 			sys.stderr.write('error %s processing record; key:%s, values:\n' % (repr(e), repr(key)))
 			traceback.print_exc(file=sys.stderr)
 
+	def parse_line(self, line):
+		parts = line.split('\t')
+		key = self._decode_component(parts[0], cache_idx=0)
+		values = map(lambda x: self._decode_component(x, cache_idx=1), parts[1:])
+
+		return key, values
+
 	def parse_input(self):
 		last_key = None
 		all_values = []
@@ -30,9 +37,7 @@ class Reducer(Streamer):
 			if not line:
 				continue
 
-			parts = line.split('\t')
-			key = self._decode_component(parts[0], self._input_serializer)
-			values = map(lambda x: self._decode_component(x, self._input_serializer), parts[1:])
+			key, values = self.parse_line(line)
 
 			if last_key != key and last_key != None:
 				self._try_reduce(last_key, all_values)

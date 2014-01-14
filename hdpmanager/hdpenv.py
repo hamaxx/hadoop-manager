@@ -54,7 +54,7 @@ class HadoopEnv(object):
 
 		os.chdir(cwd)
 
-		return packaged_requires + packaged_egg
+		return packaged_egg + packaged_requires
 
 	def _build_egg(self):
 		import setuptools
