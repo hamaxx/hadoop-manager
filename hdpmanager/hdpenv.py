@@ -32,7 +32,7 @@ class HadoopEnv(object):
 			return
 
 		sys.path.insert(0, os.getcwd())
-		mod = importlib.import_module('test')
+		mod = importlib.import_module(self._root_package)
 		path = os.path.abspath(mod.__path__[0])
 
 		os.chdir(path)
@@ -41,7 +41,8 @@ class HadoopEnv(object):
 		packages = set()
 		for path in module_paths:
 			if not path: continue
-			packages.add(path.split('.')[0])
+			parts = path.split('.')
+			packages = packages.union(['.'.join(parts[:i+1]) for i in xrange(len(parts[:-2]))])
 		return list(packages)
 
 	def _package(self):
