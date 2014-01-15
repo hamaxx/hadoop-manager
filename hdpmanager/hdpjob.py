@@ -61,7 +61,7 @@ class HadoopJob(object):
 		if not conf:
 			return
 
-		conf_file = os.path.join(self._hdpm.get_tmp_dir('conf'), fp)
+		conf_file = os.path.join(self._hdpm._get_tmp_dir('conf'), fp)
 		pickle.dump(conf, open(conf_file, 'w'))
 		return conf_file
 
