@@ -1,0 +1,330 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to hadoop-manager’s documentation! &mdash; hadoop-manager 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="hadoop-manager 0.1 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">hadoop-manager 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="welcome-to-hadoop-manager-s-documentation">
+<h1>Welcome to hadoop-manager&#8217;s documentation!<a class="headerlink" href="#welcome-to-hadoop-manager-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+<span class="target" id="module-hdpmanager"></span><div class="section" id="hadoop-manager">
+<h2>hadoop-manager<a class="headerlink" href="#hadoop-manager" title="Permalink to this headline">¶</a></h2>
+<p>Python wrapper around Hadoop streaming jar.</p>
+</div>
+<dl class="class">
+<dt id="hdpmanager.HadoopManager">
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">HadoopManager</tt><big>(</big><em>hadoop_home</em>, <em>hadoop_fs_default_name=None</em>, <em>hadoop_job_tracker=None</em><big>)</big><a class="headerlink" href="#hdpmanager.HadoopManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>HadoopManager is a central object for managing hadoop jobs and hdfs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>hadoop_home</strong> &#8211; home folder of hadoop package</li>
+<li><strong>hadoop_fs_default_name</strong> &#8211; default hdfs home used when paths provided are relative</li>
+<li><strong>hadoop_job_tracker</strong> &#8211; hadoop job tracker host:port</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="hdpmanager.HadoopManager.create_job">
+<tt class="descname">create_job</tt><big>(</big><em>input_paths</em>, <em>output_path</em>, <em>mapper</em>, <em>reducer=None</em>, <em>combiner=None</em>, <em>num_reducers=None</em>, <em>serialization=None</em>, <em>job_env=None</em>, <em>conf=None</em>, <em>root_package=None</em><big>)</big><a class="headerlink" href="#hdpmanager.HadoopManager.create_job" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create HadoopJob object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_paths</strong> &#8211; list of input files for mapper</li>
+<li><strong>output_path</strong> &#8211; path to the output dir</li>
+<li><strong>mapper</strong> &#8211; import path to the mapper class</li>
+<li><strong>reducer</strong> &#8211; import path to the reducer class</li>
+<li><strong>combiner</strong> &#8211; import path to the combiner class</li>
+<li><strong>root_package</strong> &#8211; import path to the subpackage in you app where the mapper/reducer/combiner import starts</li>
+<li><strong>num_reducers</strong> &#8211; number of reducers</li>
+<li><strong>conf</strong> &#8211; object that will be send to mapper, reducer and combiner. It will be accessible as self.conf in job objects.</li>
+<li><strong>serialization</strong> &#8211; dict with configuration for input, output and internal serialization. Valid keys are input, output and inter, valid values are json, pickle and raw.</li>
+<li><strong>job_env</strong> &#8211; dict which defines environment. Valid options are packages, package_data and requires. If packages aren&#8217;t provided all packages returned by setuptools.find_packages in root_package will be included</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hdpmanager.HadoopManager.fs">
+<tt class="descname">fs</tt><a class="headerlink" href="#hdpmanager.HadoopManager.fs" title="Permalink to this definition">¶</a></dt>
+<dd><p>HadoopFs object for managing hdfs</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hdpmanager.HadoopJob">
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">HadoopJob</tt><big>(</big><em>hdp_manager</em>, <em>input_paths</em>, <em>output_path</em>, <em>mapper</em>, <em>reducer=None</em>, <em>combiner=None</em>, <em>num_reducers=None</em>, <em>serialization=None</em>, <em>job_env=None</em>, <em>conf=None</em>, <em>root_package=None</em><big>)</big><a class="headerlink" href="#hdpmanager.HadoopJob" title="Permalink to this definition">¶</a></dt>
+<dd><p>HadoopJob object for managing mapreduce jobs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>hdp_manager</strong> &#8211; HadoopManager object</li>
+<li><strong>input_paths</strong> &#8211; list of input files for mapper</li>
+<li><strong>output_path</strong> &#8211; path to the output dir</li>
+<li><strong>mapper</strong> &#8211; import path to the mapper class</li>
+<li><strong>reducer</strong> &#8211; import path to the reducer class</li>
+<li><strong>combiner</strong> &#8211; import path to the combiner class</li>
+<li><strong>root_package</strong> &#8211; import path to the subpackage in you app where the mapper/reducer/combiner import starts</li>
+<li><strong>num_reducers</strong> &#8211; number of reducers</li>
+<li><strong>conf</strong> &#8211; object that will be send to mapper, reducer and combiner. It will be accessible as self.conf in job objects.</li>
+<li><strong>serialization</strong> &#8211; dict with configuration for input, output and internal serialization. Valid keys are input, output and inter, valid values are json, pickle and raw.</li>
+<li><strong>job_env</strong> &#8211; dict which defines environment. Valid options are packages, package_data and requires. If packages aren&#8217;t provided all packages returned by setuptools.find_packages in root_package will be included</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="hdpmanager.HadoopJob.cat_output">
+<tt class="descname">cat_output</tt><big>(</big><big>)</big><a class="headerlink" href="#hdpmanager.HadoopJob.cat_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a generator over mapreduce output</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hdpmanager.HadoopJob.rm_output">
+<tt class="descname">rm_output</tt><big>(</big><big>)</big><a class="headerlink" href="#hdpmanager.HadoopJob.rm_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove output dir</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hdpmanager.HadoopJob.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#hdpmanager.HadoopJob.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a mapreduce job</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hdpmanager.HadoopJob.run_local">
+<tt class="descname">run_local</tt><big>(</big><big>)</big><a class="headerlink" href="#hdpmanager.HadoopJob.run_local" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run job in a local simulated environment</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hdpmanager.HadoopFs">
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">HadoopFs</tt><big>(</big><em>hadoop_manager</em><big>)</big><a class="headerlink" href="#hdpmanager.HadoopFs" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="hdpmanager.HadoopFs.cat">
+<tt class="descname">cat</tt><big>(</big><em>path</em>, <em>serializer='raw'</em>, <em>tab_separated=False</em><big>)</big><a class="headerlink" href="#hdpmanager.HadoopFs.cat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a generator over files defined by path</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> &#8211; path to the files</li>
+<li><strong>serializer</strong> &#8211; input serializer. Options are json, pickle and raw(default)</li>
+<li><strong>tab_seperated</strong> &#8211; boolean if input is tab separated</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="hdpmanager.HadoopFs.rm">
+<tt class="descname">rm</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#hdpmanager.HadoopFs.rm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively remove all files on the path</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; path to the files</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hdpmanager.Mapper">
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Mapper</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2ac2d1cc50c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2ac2d1cc5150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Mapper" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="hdpmanager.Mapper.map">
+<tt class="descname">map</tt><big>(</big><em>line</em><big>)</big><a class="headerlink" href="#hdpmanager.Mapper.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override this methos for mapping the input line
+Output can be either returned or yielded as a key, value pair</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> &#8211; one line of the input file serialized by the input serializer</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hdpmanager.Reducer">
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Reducer</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2ac2d1cc50c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2ac2d1cc5150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Reducer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="hdpmanager.Reducer.reduce">
+<tt class="descname">reduce</tt><big>(</big><em>key</em>, <em>values</em><big>)</big><a class="headerlink" href="#hdpmanager.Reducer.reduce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override this methos for reducing the input
+Output can be either returned or yielded as a key, value pair</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> &#8211; key returned by the mapper</li>
+<li><strong>values</strong> &#8211; list of values retuned by the mapper</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hdpmanager.Combiner">
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Combiner</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2ac2d1cc50c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2ac2d1cc5150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Combiner" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="hdpmanager.Combiner.reduce">
+<tt class="descname">reduce</tt><big>(</big><em>key</em>, <em>values</em><big>)</big><a class="headerlink" href="#hdpmanager.Combiner.reduce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override this methos for reducing the input
+Output can be either returned or yielded as a key, value pair</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> &#8211; key returned by the mapper</li>
+<li><strong>values</strong> &#8211; list of values retuned by the mapper</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to hadoop-manager&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#hadoop-manager">hadoop-manager</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">hadoop-manager 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Jure Ham.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
