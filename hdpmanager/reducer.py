@@ -13,6 +13,13 @@ class Reducer(Streamer):
 		self._write_protocol = serializers['output']
 
 	def reduce(self, key, values):
+		"""
+		Override this methos for reducing the input
+		Output can be either returned or yielded as a key, value pair
+
+		:param key: key returned by the mapper
+		:param values: list of values retuned by the mapper
+		"""
 		return key, values
 
 	def _try_reduce(self, key, values):

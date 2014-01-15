@@ -24,9 +24,18 @@ class Streamer(object):
 		self.conf = self._get_env_conf(CONF_PICKE_FILE_PATH)
 
 		counter = Counter(self.__class__.__name__)
-		self.count = counter.count
+		self._count = counter.count
 
 		self._parse_serializers()
+
+	def count(self, name, incr):
+		"""
+		Hadoop counter
+
+		:param name: name of the counter
+		:param incr: increment
+		"""
+		self._count(name, incr)
 
 	def _get_env_conf(self, fn):
 		if not os.path.exists(fn):

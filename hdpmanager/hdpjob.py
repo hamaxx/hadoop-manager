@@ -19,6 +19,21 @@ SERIALIZATION_CONF_PICKE_FILE_PATH = 'serialization_conf.pickle'
 
 
 class HadoopJob(object):
+	"""
+	HadoopJob object for managing mapreduce jobs
+
+	:param hdp_manager: HadoopManager object
+	:param input_paths: list of input files for mapper
+	:param output_path: path to the output dir
+	:param mapper: import path to the mapper class
+	:param reducer: import path to the reducer class
+	:param combiner: import path to the combiner class
+	:param root_package: import path to the subpackage in you app where the mapper/reducer/combiner import starts
+	:param num_reducers: number of reducers
+	:param conf: object that will be send to mapper, reducer and combiner. It will be accessible as self.conf in job objects.
+	:param serialization: dict with configuration for input, output and internal serialization. Valid keys are input, output and inter, valid values are json, pickle and raw.
+	:param job_env: dict which defines environment. Valid options are packages, package_data and requires. If packages aren't provided all packages returned by setuptools.find_packages in root_package will be included
+	"""
 
 	def __init__(self, hdp_manager, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, serialization=None, job_env=None, conf=None, root_package=None):
 
@@ -74,6 +89,10 @@ class HadoopJob(object):
 		return self._get_streamer_command(self._combiner, encoded)
 
 	def run_local(self):
+		"""
+		Run job in a local simulated environment
+		"""
+
 		import shutil
 
 		env_files = self._hadoop_env.env_files
@@ -121,17 +140,29 @@ class HadoopJob(object):
 			of.write(out_stream)
 
 	def rm_output(self):
+		"""
+		Remove output dir
+		"""
+
 		try:
 			self._hdpm.fs.rm(self._output_path)
 		except self._hdpm.HadoopRunException:
 			pass
 
 	def cat_output(self):
+		"""
+		Returns a generator over mapreduce output
+		"""
+
 		from streamer import DEFAULT_OUTPUT_SERIALIZED
 		output_serializer = (self._serialization_conf or {}).get('output', DEFAULT_OUTPUT_SERIALIZED)
-		return self._hdpm.fs.cat(os.path.join(self._output_path, 'part-*'), serializer=output_serializer, tab_seperated=True)
+		return self._hdpm.fs.cat(os.path.join(self._output_path, 'part-*'), serializer=output_serializer, tab_separated=True)
 
 	def run(self):
+		"""
+		Run a mapreduce job
+		"""
+
 		env_files = self._hadoop_env.env_files
 
 		cmd = ('jar', self._hdpm._hadoop_stream_jar)

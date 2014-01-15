@@ -75,18 +75,18 @@ class HadoopEnv(object):
 
 		# Move dist folders to /tmp
 		opt_dict = dist.get_option_dict('bdist_egg')
-		opt_dict['bdist_dir'] = (EGG_NAME, self._hdpm.get_tmp_dir('bdist'))
-		opt_dict['dist_dir'] = (EGG_NAME, self._hdpm.get_tmp_dir('dist'))
+		opt_dict['bdist_dir'] = (EGG_NAME, self._hdpm._get_tmp_dir('bdist'))
+		opt_dict['dist_dir'] = (EGG_NAME, self._hdpm._get_tmp_dir('dist'))
 
 		# Move build folders to /tmp
 		build_opt_dict = dist.get_option_dict('build_py')
-		build_opt_dict['build_lib'] = (EGG_NAME, self._hdpm.get_tmp_dir('build'))
+		build_opt_dict['build_lib'] = (EGG_NAME, self._hdpm._get_tmp_dir('build'))
 		install_opt_dict = dist.get_option_dict('install_lib')
-		install_opt_dict['build_dir'] = (EGG_NAME, self._hdpm.get_tmp_dir('build'))
+		install_opt_dict['build_dir'] = (EGG_NAME, self._hdpm._get_tmp_dir('build'))
 
 		# Move egg folders to /tmp
 		egg_opt_dict = dist.get_option_dict('egg_info')
-		egg_opt_dict['egg_base'] = (EGG_NAME, self._hdpm.get_tmp_dir('egg'))
+		egg_opt_dict['egg_base'] = (EGG_NAME, self._hdpm._get_tmp_dir('egg'))
 
 		dist.run_command('bdist_egg')
 
@@ -106,7 +106,7 @@ class HadoopEnv(object):
 		except AttributeError:
 			path = mod.__file__
 
-		pkg_dir = self._hdpm.get_tmp_dir('pkg')
+		pkg_dir = self._hdpm._get_tmp_dir('pkg')
 
 		if os.path.isdir(path):	# Package in a folder
 			shutil.make_archive(os.path.join(pkg_dir, mod.__package__), 'zip', os.path.normpath(os.path.join(path, '..')), mod.__package__)

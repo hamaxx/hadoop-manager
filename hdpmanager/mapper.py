@@ -12,6 +12,12 @@ class Mapper(Streamer):
 		self._write_protocol = serializers['inter']
 
 	def map(self, line):
+		"""
+		Override this methos for mapping the input line
+		Output can be either returned or yielded as a key, value pair
+
+		:param line: one line of the input file serialized by the input serializer
+		"""
 		return line
 
 	def parse_line(self, line):
