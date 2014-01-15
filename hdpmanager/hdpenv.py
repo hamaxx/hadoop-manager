@@ -1,6 +1,8 @@
 import os
 import sys
 
+import hdpmanager
+
 
 EGG_NAME = 'hadoop_job'
 EGG_VERSION = '1.0'
@@ -60,7 +62,7 @@ class HadoopEnv(object):
 			'name': EGG_NAME,
 			'version': '1.0',
 
-			'script_name': __file__,
+			'script_name': os.path.split(hdpmanager.__path__[0])[0],
 			'zip_safe': False,
 		}
 
@@ -112,7 +114,7 @@ class HadoopEnv(object):
 			dname = os.path.join('lib', '%s.zip' % mod.__package__)
 			return dname, os.path.abspath(fname)
 
-		elif os.path.splitext(os.path.normpath(os.path.join(path, '..')))[1] == '.egg': # Package in an egg
+		elif os.path.splitext(os.path.split(path)[0])[1] == '.egg': # Package in an egg
 			egg_path = os.path.normpath(os.path.join(path, '..'))
 			return os.path.basename(egg_path), egg_path
 
