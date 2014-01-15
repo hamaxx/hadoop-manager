@@ -122,9 +122,14 @@ class HadoopJob(object):
 
 	def rm_output(self):
 		try:
-			self._hdpm._run_hadoop_cmd('fs', ('-rm', '-r', self._output_path))
+			self._hdpm.fs.rm(self._output_path)
 		except self._hdpm.HadoopRunException:
 			pass
+
+	def cat_output(self):
+		from streamer import DEFAULT_OUTPUT_SERIALIZED
+		output_serializer = (self._serialization_conf or {}).get('output', DEFAULT_OUTPUT_SERIALIZED)
+		return self._hdpm.fs.cat(os.path.join(self._output_path, 'part-*'), serializer=output_serializer, tab_seperated=True)
 
 	def run(self):
 		env_files = self._hadoop_env.env_files
@@ -149,4 +154,4 @@ class HadoopJob(object):
 			('-file', self._serialization_conf_file),
 		]
 
-		self._hdpm._run_hadoop_cmd(cmd, attrs)
+		self._hdpm._run_hadoop_cmd_echo(cmd, attrs)

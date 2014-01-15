@@ -11,7 +11,16 @@ HADOOP_STREAMING_JAR_RE = re.compile(r'^hadoop.*streaming.*\.jar$')
 TMP_FOLDER = '/tmp/hadoop-manager/'
 
 class HadoopRunException(Exception):
-	pass
+
+	def __init__(self, msg, stderr=None):
+		super(HadoopRunException, self).__init__(msg)
+		self.stderr = stderr
+
+	def __str__(self):
+		err = super(HadoopRunException, self).__str__()
+		if self.stderr:
+			err += '\n' + self.stderr.read()
+		return err
 
 class HadoopManager(object):
 
@@ -64,6 +73,11 @@ class HadoopManager(object):
 
 		return [str(c) for c in cmd]
 
+	def _run_hadoop_cmd_echo(self, command, attrs):
+		for line in self._run_hadoop_cmd(command, attrs):
+			print line,
+		print
+
 	def _run_hadoop_cmd(self, command, attrs):
 		cmd = [self._hadoop_bin]
 
@@ -79,20 +93,21 @@ class HadoopManager(object):
 		for attr in attrs:
 			cmd += self._get_cmd_list(attr)
 
-		hadoop = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-		self._print_lines(hadoop.stdout)
+		hadoop = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+		for line in self._yield_lines(hadoop.stdout):
+			yield line
 
 		hadoop.wait()
 		if hadoop.returncode != 0:
-			raise HadoopRunException('Hadoop streaming command failed!')
+			raise HadoopRunException('Running hadoop command failed with code %s!' % hadoop.returncode, stderr=hadoop.stderr)
 
-	def _print_lines(self, pipe):
+	def _yield_lines(self, pipe):
 		while True:
 			o = pipe.readline()
 			if not o:
 				break
-			print o,
-		print
+			yield o
 
 	def get_tmp_dir(self, subdir=None):
 		path = TMP_FOLDER

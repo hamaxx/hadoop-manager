@@ -73,4 +73,9 @@ class RawProtocol(object):
 	def decode(self, s):
 		return s
 
-
+def get_protocol_from_name(name):
+	return {
+		'json' : JsonProtocol,
+		'pickle': PickleProtocol,
+		'raw': RawProtocol,
+	}[name]()

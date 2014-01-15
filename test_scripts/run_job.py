@@ -1,4 +1,6 @@
-import sys
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+
 import urlparse
 
 from hdpmanager import HadoopManager
@@ -14,11 +16,11 @@ class MyMapper(Mapper):
 		if not url: return
 		host = urlparse.urlparse(url).hostname.strip()
 		yield (blog_id, host), 1
-		self.count('map_ok_fino', 1)
+		self.count('map_ok', 1)
 
 class MyReducer(Reducer):
 	def reduce(self, key, values):
-		yield repr(key), sum(values)
+		yield key, sum(values)
 		self.count('reduce_ok', 1)
 
 class MyCombiner(Combiner):
@@ -35,7 +37,7 @@ if __name__ == "__main__":
 		)
 
 	job = mng.create_job(
-			input_paths=['/user/badger/logs/pageviews/pageviews-2014-01-10_000*'],
+			input_paths=['/user/badger/logs/pageviews/pageviews-2014-01-10_00001'],
 			output_path='/user/ham/out.txt',
 
 			mapper='test_scripts.run_job.MyMapper',
@@ -43,13 +45,14 @@ if __name__ == "__main__":
 			combiner='test_scripts.run_job.MyCombiner',
 			num_reducers=1,
 
-			serialization=dict(input='json', output='json', inter='pickle'),
+			serialization=dict(input='json', output='pickle', inter='pickle'),
 
 			job_env=dict(requires=['ujson']),
 		)
 
 	job.rm_output()
 	job.run()
+	print '\n'.join(str(l) for l in job.cat_output())
 
 	#job._input_paths = ['test_scripts/test_in.json']
 	#job._output_path = 'out.txt'

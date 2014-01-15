@@ -4,7 +4,7 @@ import cPickle as pickle
 
 from counter import Counter
 from hdpjob import CONF_PICKE_FILE_PATH, SERIALIZATION_CONF_PICKE_FILE_PATH
-from protocol import JsonProtocol, PickleProtocol, RawProtocol
+from protocol import get_protocol_from_name
 
 
 DEFAULT_INPUT_SERIALIZED = 'json'
@@ -37,18 +37,12 @@ class Streamer(object):
 		raise NotImplementedError('Must be implemented in Mapper/Reducer/Combiner')
 
 	def _parse_serializers(self):
-		serializer_objects = {
-			'json' : JsonProtocol(),
-			'pickle': PickleProtocol(),
-			'raw': RawProtocol(),
-		}
-
 		ser_conf = self._get_env_conf(SERIALIZATION_CONF_PICKE_FILE_PATH) or {}
 
 		serializers = {
-			'input': serializer_objects.get(ser_conf.get('input', DEFAULT_INPUT_SERIALIZED)),
-			'output': serializer_objects.get(ser_conf.get('output', DEFAULT_OUTPUT_SERIALIZED)),
-			'inter': serializer_objects.get(ser_conf.get('inter', DEFAULT_INTER_SERIALIZED)),
+			'input': get_protocol_from_name(ser_conf.get('input', DEFAULT_INPUT_SERIALIZED)),
+			'output': get_protocol_from_name(ser_conf.get('output', DEFAULT_OUTPUT_SERIALIZED)),
+			'inter': get_protocol_from_name(ser_conf.get('inter', DEFAULT_INTER_SERIALIZED)),
 		}
 
 		self._set_serializers(serializers)
