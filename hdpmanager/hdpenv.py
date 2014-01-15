@@ -10,7 +10,8 @@ ZHDUTILS_PACKAGE = 'hdpmanager'
 
 class HadoopEnv(object):
 
-	def __init__(self, packages=None, package_data=None, requires=None, module_paths=None, root_package=None):
+	def __init__(self, hdp_manager, packages=None, package_data=None, requires=None, module_paths=None, root_package=None):
+		self._hdpm = hdp_manager
 
 		self._root_package = root_package
 
@@ -32,7 +33,7 @@ class HadoopEnv(object):
 			return
 
 		sys.path.insert(0, os.getcwd())
-		mod = importlib.import_module(self._root_package)
+		mod = importlib.import_module('test')
 		path = os.path.abspath(mod.__path__[0])
 
 		os.chdir(path)
@@ -41,8 +42,7 @@ class HadoopEnv(object):
 		packages = set()
 		for path in module_paths:
 			if not path: continue
-			parts = path.split('.')
-			packages = packages.union(['.'.join(parts[:i+1]) for i in xrange(len(parts[:-2]))])
+			packages.add(path.split('.')[0])
 		return list(packages)
 
 	def _package(self):
@@ -73,12 +73,28 @@ class HadoopEnv(object):
 			attrs['package_data'] = self._package_data
 
 		dist = setuptools.Distribution(attrs)
+
+		# Move dist folders to /tmp
+		opt_dict = dist.get_option_dict('bdist_egg')
+		opt_dict['bdist_dir'] = (EGG_NAME, self._hdpm.get_tmp_dir('bdist'))
+		opt_dict['dist_dir'] = (EGG_NAME, self._hdpm.get_tmp_dir('dist'))
+
+		# Move build folders to /tmp
+		build_opt_dict = dist.get_option_dict('build_py')
+		build_opt_dict['build_lib'] = (EGG_NAME, self._hdpm.get_tmp_dir('build'))
+		install_opt_dict = dist.get_option_dict('install_lib')
+		install_opt_dict['build_dir'] = (EGG_NAME, self._hdpm.get_tmp_dir('build'))
+
+		# Move egg folders to /tmp
+		egg_opt_dict = dist.get_option_dict('egg_info')
+		egg_opt_dict['egg_base'] = (EGG_NAME, self._hdpm.get_tmp_dir('egg'))
+
 		dist.run_command('bdist_egg')
 
 		egg_python_version = '%s.%s' % (sys.version_info.major, sys.version_info.minor)
 		egg_filename = '%s-%s-py%s.egg' % (EGG_NAME, EGG_VERSION, egg_python_version)
 
-		return [(egg_filename, os.path.abspath('dist/' + egg_filename))]
+		return [(egg_filename, os.path.join(opt_dict['dist_dir'][1], egg_filename))]
 
 	def _get_module_package(self, module):
 		import importlib
@@ -91,10 +107,12 @@ class HadoopEnv(object):
 		except AttributeError:
 			path = mod.__file__
 
+		pkg_dir = self._hdpm.get_tmp_dir('pkg')
+
 		if os.path.isdir(path):	# Package in a folder
-			shutil.make_archive('dist/%s' % mod.__package__, 'zip', os.path.normpath(os.path.join(path, '..')), mod.__package__)
-			fname = 'dist/%s.zip' % mod.__package__
-			dname = 'lib/%s.zip' % mod.__package__
+			shutil.make_archive(os.path.join(pkg_dir, mod.__package__), 'zip', os.path.normpath(os.path.join(path, '..')), mod.__package__)
+			fname = os.path.join(pkg_dir, '%s.zip' % mod.__package__)
+			dname = os.path.join('lib', '%s.zip' % mod.__package__)
 			return dname, os.path.abspath(fname)
 
 		elif os.path.splitext(os.path.normpath(os.path.join(path, '..')))[1] == '.egg': # Package in an egg

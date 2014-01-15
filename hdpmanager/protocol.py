@@ -24,7 +24,7 @@ class _CachingProtocol(object):
 
 	def encode(self, o, cache_idx=-1):
 		if cache_idx < 0:
-			return self._serializer.dumps(o)
+			return self._dumps(o)
 
 		cached_value = self._cached_values.get(cache_idx)
 		if cached_value and cached_value[0] == o:
@@ -37,7 +37,7 @@ class _CachingProtocol(object):
 
 	def decode(self, s, cache_idx=-1):
 		if cache_idx < 0:
-			return self._serializer.loads(s)
+			return self._loads(s)
 
 		cached_value = self._cached_values.get(cache_idx)
 		if cached_value and cached_value[1] == s:

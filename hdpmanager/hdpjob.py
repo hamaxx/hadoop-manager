@@ -40,14 +40,15 @@ class HadoopJob(object):
 		self._conf = conf
 		self._conf_file = self._create_conf_file(conf, CONF_PICKE_FILE_PATH)
 
-		self._hadoop_env = HadoopEnv(root_package=self._root_package, module_paths=[self._mapper, self._reducer, self._combiner], **(job_env or {}))
+		self._hadoop_env = HadoopEnv(hdp_manager, root_package=self._root_package, module_paths=[self._mapper, self._reducer, self._combiner], **(job_env or {}))
 
 	def _create_conf_file(self, conf, fp):
 		if not conf:
 			return
 
-		pickle.dump(conf, open(fp, 'w'))
-		return fp
+		conf_file = os.path.join(self._hdpm.get_tmp_dir('conf'), fp)
+		pickle.dump(conf, open(conf_file, 'w'))
+		return conf_file
 
 	def _get_streamer_command(self, module_path, encoded):
 		path = module_path.split('.')
@@ -69,9 +70,16 @@ class HadoopJob(object):
 		return self._get_streamer_command(self._combiner, encoded)
 
 	def run_local(self):
+		import shutil
+
 		env_files = self._hadoop_env.env_files
 
 		env = {'PYTHONPATH': 'PYTHONPATH=:%s' % (os.pathsep.join([e[1] for e in env_files]))}
+
+		if self._conf_file:
+			shutil.copy2(self._conf_file, os.path.basename(self._conf_file))
+		if self._serialization_conf_file:
+			shutil.copy2(self._serialization_conf_file, os.path.basename(self._serialization_conf_file))
 
 		mapper = subprocess.Popen(self._get_mapper_command(False), env=env, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 
@@ -99,6 +107,11 @@ class HadoopJob(object):
 			reducer.stdin.close()
 
 			out_stream = reducer.stdout.read()
+
+		if self._conf_file:
+			os.remove(os.path.basename(self._conf_file))
+		if self._serialization_conf_file:
+			os.remove(os.path.basename(self._serialization_conf_file))
 
 		with open(self._output_path, 'w') as of:
 			of.write(out_stream)
