@@ -15,6 +15,8 @@ class HadoopRunException(Exception):
 
 class HadoopManager(object):
 
+	HadoopRunException = HadoopRunException
+
 	def __init__(self, hadoop_home, hadoop_fs_default_name=None, hadoop_job_tracker=None):
 		self.rm_tmp_dir()
 

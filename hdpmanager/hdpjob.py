@@ -121,7 +121,10 @@ class HadoopJob(object):
 			of.write(out_stream)
 
 	def rm_output(self):
-		self._hdpm._run_hadoop_cmd('fs', ('-rm', '-r', self._output_path))
+		try:
+			self._hdpm._run_hadoop_cmd('fs', ('-rm', '-r', self._output_path))
+		except self._hdpm.HadoopRunException:
+			pass
 
 	def run(self):
 		env_files = self._hadoop_env.env_files
