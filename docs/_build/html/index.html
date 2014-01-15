@@ -109,28 +109,8 @@
 <dl class="class">
 <dt id="hdpmanager.HadoopJob">
 <em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">HadoopJob</tt><big>(</big><em>hdp_manager</em>, <em>input_paths</em>, <em>output_path</em>, <em>mapper</em>, <em>reducer=None</em>, <em>combiner=None</em>, <em>num_reducers=None</em>, <em>serialization=None</em>, <em>job_env=None</em>, <em>conf=None</em>, <em>root_package=None</em><big>)</big><a class="headerlink" href="#hdpmanager.HadoopJob" title="Permalink to this definition">¶</a></dt>
-<dd><p>HadoopJob object for managing mapreduce jobs</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>hdp_manager</strong> &#8211; HadoopManager object</li>
-<li><strong>input_paths</strong> &#8211; list of input files for mapper</li>
-<li><strong>output_path</strong> &#8211; path to the output dir</li>
-<li><strong>mapper</strong> &#8211; import path to the mapper class</li>
-<li><strong>reducer</strong> &#8211; import path to the reducer class</li>
-<li><strong>combiner</strong> &#8211; import path to the combiner class</li>
-<li><strong>root_package</strong> &#8211; import path to the subpackage in you app where the mapper/reducer/combiner import starts</li>
-<li><strong>num_reducers</strong> &#8211; number of reducers</li>
-<li><strong>conf</strong> &#8211; object that will be send to mapper, reducer and combiner. It will be accessible as self.conf in job objects.</li>
-<li><strong>serialization</strong> &#8211; dict with configuration for input, output and internal serialization. Valid keys are input, output and inter, valid values are json, pickle and raw.</li>
-<li><strong>job_env</strong> &#8211; dict which defines environment. Valid options are packages, package_data and requires. If packages aren&#8217;t provided all packages returned by setuptools.find_packages in root_package will be included</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<dd><p>HadoopJob object for managing mapreduce jobs
+Create it with the HadoopManager.create_job methos</p>
 <dl class="method">
 <dt id="hdpmanager.HadoopJob.cat_output">
 <tt class="descname">cat_output</tt><big>(</big><big>)</big><a class="headerlink" href="#hdpmanager.HadoopJob.cat_output" title="Permalink to this definition">¶</a></dt>
@@ -197,7 +177,7 @@
 
 <dl class="class">
 <dt id="hdpmanager.Mapper">
-<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Mapper</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2b575e5410c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2b575e541150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Mapper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Mapper</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2b328dc410c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2b328dc41150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Mapper" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="hdpmanager.Mapper.map">
 <tt class="descname">map</tt><big>(</big><em>line</em><big>)</big><a class="headerlink" href="#hdpmanager.Mapper.map" title="Permalink to this definition">¶</a></dt>
@@ -217,7 +197,7 @@ Output can be either returned or yielded as a key, value pair</p>
 
 <dl class="class">
 <dt id="hdpmanager.Reducer">
-<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Reducer</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2b575e5410c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2b575e541150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Reducer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Reducer</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2b328dc410c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2b328dc41150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Reducer" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="hdpmanager.Reducer.reduce">
 <tt class="descname">reduce</tt><big>(</big><em>key</em>, <em>values</em><big>)</big><a class="headerlink" href="#hdpmanager.Reducer.reduce" title="Permalink to this definition">¶</a></dt>
@@ -241,7 +221,7 @@ Output can be either returned or yielded as a key, value pair</p>
 
 <dl class="class">
 <dt id="hdpmanager.Combiner">
-<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Combiner</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2b575e5410c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2b575e541150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Combiner" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Combiner</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2b328dc410c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2b328dc41150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Combiner" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="hdpmanager.Combiner.reduce">
 <tt class="descname">reduce</tt><big>(</big><em>key</em>, <em>values</em><big>)</big><a class="headerlink" href="#hdpmanager.Combiner.reduce" title="Permalink to this definition">¶</a></dt>

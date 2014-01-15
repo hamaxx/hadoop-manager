@@ -61,37 +61,8 @@ class class hdpmanager.HadoopManager(hadoop_home, hadoop_fs_default_name=None, h
 
 class class hdpmanager.HadoopJob(hdp_manager, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, serialization=None, job_env=None, conf=None, root_package=None)
 
-   HadoopJob object for managing mapreduce jobs
-
-   Parameters:
-      * **hdp_manager** -- HadoopManager object
-
-      * **input_paths** -- list of input files for mapper
-
-      * **output_path** -- path to the output dir
-
-      * **mapper** -- import path to the mapper class
-
-      * **reducer** -- import path to the reducer class
-
-      * **combiner** -- import path to the combiner class
-
-      * **root_package** -- import path to the subpackage in you app
-        where the mapper/reducer/combiner import starts
-
-      * **num_reducers** -- number of reducers
-
-      * **conf** -- object that will be send to mapper, reducer and
-        combiner. It will be accessible as self.conf in job objects.
-
-      * **serialization** -- dict with configuration for input,
-        output and internal serialization. Valid keys are input,
-        output and inter, valid values are json, pickle and raw.
-
-      * **job_env** -- dict which defines environment. Valid options
-        are packages, package_data and requires. If packages aren't
-        provided all packages returned by setuptools.find_packages in
-        root_package will be included
+   HadoopJob object for managing mapreduce jobs Create it with the
+   HadoopManager.create_job methos
 
    cat_output()
 
@@ -130,7 +101,7 @@ class class hdpmanager.HadoopFs(hadoop_manager)
       Parameters:
          **path** -- path to the files
 
-class class hdpmanager.Mapper(input_stream=<open file '<stdin>', mode 'r' at 0x2b447b1160c0>, output_stream=<open file '<stdout>', mode 'w' at 0x2b447b116150>)
+class class hdpmanager.Mapper(input_stream=<open file '<stdin>', mode 'r' at 0x2b83e4a4e0c0>, output_stream=<open file '<stdout>', mode 'w' at 0x2b83e4a4e150>)
 
    map(line)
 
@@ -141,7 +112,7 @@ class class hdpmanager.Mapper(input_stream=<open file '<stdin>', mode 'r' at 0x2
          **line** -- one line of the input file serialized by the
          input serializer
 
-class class hdpmanager.Reducer(input_stream=<open file '<stdin>', mode 'r' at 0x2b447b1160c0>, output_stream=<open file '<stdout>', mode 'w' at 0x2b447b116150>)
+class class hdpmanager.Reducer(input_stream=<open file '<stdin>', mode 'r' at 0x2b83e4a4e0c0>, output_stream=<open file '<stdout>', mode 'w' at 0x2b83e4a4e150>)
 
    reduce(key, values)
 
@@ -153,7 +124,7 @@ class class hdpmanager.Reducer(input_stream=<open file '<stdin>', mode 'r' at 0x
 
          * **values** -- list of values retuned by the mapper
 
-class class hdpmanager.Combiner(input_stream=<open file '<stdin>', mode 'r' at 0x2b447b1160c0>, output_stream=<open file '<stdout>', mode 'w' at 0x2b447b116150>)
+class class hdpmanager.Combiner(input_stream=<open file '<stdin>', mode 'r' at 0x2b83e4a4e0c0>, output_stream=<open file '<stdout>', mode 'w' at 0x2b83e4a4e150>)
 
    reduce(key, values)
 
