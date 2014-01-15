@@ -40,7 +40,7 @@ class HadoopJob(object):
 		self._conf = conf
 		self._conf_file = self._create_conf_file(conf, CONF_PICKE_FILE_PATH)
 
-		self._hadoop_env = HadoopEnv(hdp_manager, root_package=self._root_package, module_paths=[self._mapper, self._reducer, self._combiner], **(job_env or {}))
+		self._hadoop_env = HadoopEnv(hdp_manager, root_package=self._root_package, **(job_env or {}))
 
 	def _create_conf_file(self, conf, fp):
 		if not conf:

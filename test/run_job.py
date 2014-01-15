@@ -61,10 +61,10 @@ if __name__ == "__main__":
 			job_env=dict(requires=['ujson'])
 		)
 
-	job.rm_output()
-	job.run()
+	#job.rm_output()
+	#job.run()
 
-	#job._input_paths = ['test/test_in.json']
-	#job._output_path = 'out.txt'
-	#job.run_local()
+	job._input_paths = ['test/test_in.json']
+	job._output_path = 'out.txt'
+	job.run_local()
 
