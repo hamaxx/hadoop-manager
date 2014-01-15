@@ -3,5 +3,5 @@ from reducer import Reducer
 class Combiner(Reducer):
 
 	def _set_serializers(self, serializers):
-		self._input_serializer = serializers['inter']
-		self._output_serializer = serializers['inter']
+		self._read_protocol = serializers['inter']
+		self._write_protocol = serializers['inter']
