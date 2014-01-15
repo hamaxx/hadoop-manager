@@ -55,7 +55,8 @@ class HadoopManager(object):
 		return path
 
 	def rm_tmp_dir(self):
-		shutil.rmtree(TMP_FOLDER)
+		if os.path.exists(TMP_FOLDER):
+			shutil.rmtree(TMP_FOLDER)
 
 	def create_job(*args, **kwargs):
 		return HadoopJob(*args, **kwargs)
