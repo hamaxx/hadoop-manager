@@ -30,7 +30,8 @@ if __name__ == "__main__":
 
 	mng = HadoopManager(
 			hadoop_home='/opt/cloudera/parcels/CDH-4.2.0-1.cdh4.2.0.p0.10',
-			hadoop_config='test/hdfs_config.xml'
+			hadoop_fs_default_name='hdfs://zedoop/',
+			hadoop_job_tracker='hdp01.zemanta.com:8021',
 		)
 
 	job = mng.create_job(
@@ -44,13 +45,13 @@ if __name__ == "__main__":
 
 			serialization=dict(input='json', output='json', inter='pickle'),
 
-			job_env=dict(requires=['ujson'])
+			job_env=dict(requires=['ujson']),
 		)
 
-	#job.rm_output()
-	#job.run()
+	job.rm_output()
+	job.run()
 
-	job._input_paths = ['test_scripts/test_in.json']
-	job._output_path = 'out.txt'
-	job.run_local()
+	#job._input_paths = ['test_scripts/test_in.json']
+	#job._output_path = 'out.txt'
+	#job.run_local()
 

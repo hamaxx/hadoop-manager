@@ -34,7 +34,7 @@ class Streamer(object):
 		return pickle.load(open(fn))
 
 	def _set_serializers(self, serializers):
-		raise Exception('Must be implemented in Mapper/Reducer/Combiner')
+		raise NotImplementedError('Must be implemented in Mapper/Reducer/Combiner')
 
 	def _parse_serializers(self):
 		serializer_objects = {

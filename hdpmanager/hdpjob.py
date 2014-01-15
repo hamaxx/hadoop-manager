@@ -64,9 +64,13 @@ class HadoopJob(object):
 		return self._get_streamer_command(self._mapper, encoded)
 
 	def _get_reducer_command(self, encoded=True):
+		if not self._reducer:
+			return
 		return self._get_streamer_command(self._reducer, encoded)
 
 	def _get_combiner_command(self, encoded=True):
+		if not self._combiner:
+			return
 		return self._get_streamer_command(self._combiner, encoded)
 
 	def run_local(self):
@@ -117,44 +121,29 @@ class HadoopJob(object):
 			of.write(out_stream)
 
 	def rm_output(self):
-		cmd = [self._hdpm._hadoop_bin, 'fs',
-			'-conf', self._hdpm._hadoop_config,
-			'-rm', '-r', self._output_path,]
-
-		hadoop = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-		self._hdpm._print_lines(hadoop.stdout)
+		self._hdpm._run_hadoop_cmd('fs', ('-rm', '-r', self._output_path))
 
 	def run(self):
 		env_files = self._hadoop_env.env_files
 
-		cmd = [self._hdpm._hadoop_bin, 'jar', self._hdpm._hadoop_stream_jar,
-			'-conf', self._hdpm._hadoop_config,
-			'-mapper', self._get_mapper_command(),
-			'-output', self._output_path,]
+		cmd = ('jar', self._hdpm._hadoop_stream_jar)
 
-		for efile in env_files:
-			cmd += ['-file', efile[1]]
-		cmd += ['-cmdenv', 'PYTHONPATH=:%s' % (os.pathsep.join([e[0] for e in env_files]))]
+		attrs = [
+			('-mapper', self._get_mapper_command()),
 
-		for path in self._input_paths:
-			cmd += ['-input', path]
+			('-input', [path for path in self._input_paths]),
+			('-output', self._output_path),
 
-		if self._reducer:
-			cmd += ['-reducer', self._get_reducer_command(),
-				'-numReduceTasks', str(self._num_reducers)]
+			('-cmdenv', 'PYTHONPATH=:%s' % (os.pathsep.join([e[0] for e in env_files]))),
+			('-file', [efile[1] for efile in env_files]),
 
-		if self._combiner:
-			cmd += ['-combiner', self._get_combiner_command()]
+			('-reducer', self._get_reducer_command()),
+			('-numReduceTasks', self._num_reducers),
 
-		if self._conf_file:
-			cmd += ['-file', self._conf_file]
+			('-combiner', self._get_combiner_command()),
 
-		if self._serialization_conf_file:
-			cmd += ['-file', self._serialization_conf_file]
+			('-file', self._conf_file),
+			('-file', self._serialization_conf_file),
+		]
 
-		hadoop = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1)
-		self._hdpm._print_lines(hadoop.stdout)
-
-		hadoop.wait()
-		if hadoop.returncode != 0:
-			raise Exception('Hadoop streaming command failed!')
+		self._hdpm._run_hadoop_cmd(cmd, attrs)
