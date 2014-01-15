@@ -62,7 +62,7 @@ class HadoopEnv(object):
 			'name': EGG_NAME,
 			'version': '1.0',
 
-			'script_name': os.path.split(hdpmanager.__path__[0])[0],
+			'script_name': os.path.split(os.path.split(hdpmanager.__file__)[0])[0],
 			'zip_safe': False,
 		}
 

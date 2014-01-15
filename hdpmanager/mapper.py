@@ -1,3 +1,5 @@
+__all__ = ['Mapper']
+
 import sys
 import traceback
 

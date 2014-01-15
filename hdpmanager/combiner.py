@@ -1,3 +1,5 @@
+__all__ = ['Combiner']
+
 from reducer import Reducer
 
 class Combiner(Reducer):

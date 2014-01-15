@@ -12,8 +12,8 @@ Python wrapper around Hadoop streaming jar.
 ###Basic Example
 
 	from hdpmanager import HadoopManager
-	from hdpmanager.mapper import Mapper
-	from hdpmanager.reducer import Reducer
+	from hdpmanager import Mapper
+	from hdpmanager import Reducer
 
 
 	class MyMapper(Mapper):

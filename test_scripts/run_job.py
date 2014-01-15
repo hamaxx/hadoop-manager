@@ -4,9 +4,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 import urlparse
 
 from hdpmanager import HadoopManager
-from hdpmanager.mapper import Mapper
-from hdpmanager.reducer import Reducer
-from hdpmanager.combiner import Combiner
+from hdpmanager import Mapper
+from hdpmanager import Reducer
+from hdpmanager import Combiner
 
 
 class MyMapper(Mapper):
@@ -50,11 +50,11 @@ if __name__ == "__main__":
 			job_env=dict(requires=['ujson']),
 		)
 
-	job.rm_output()
-	job.run()
-	print '\n'.join(str(l) for l in job.cat_output())
+	#job.rm_output()
+	#job.run()
+	#print '\n'.join(str(l) for l in job.cat_output())
 
-	#job._input_paths = ['test_scripts/test_in.json']
-	#job._output_path = 'out.txt'
-	#job.run_local()
+	job._input_paths = ['test_scripts/test_in.json']
+	job._output_path = 'out.txt'
+	job.run_local()
 

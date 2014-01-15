@@ -1,3 +1,5 @@
+__all__ = ['Reducer']
+
 import sys
 import traceback
 
