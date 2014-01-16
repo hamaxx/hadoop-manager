@@ -2,6 +2,7 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
 import urlparse
+import re
 
 from hdpmanager import HadoopManager
 from hdpmanager import Mapper
@@ -10,6 +11,10 @@ from hdpmanager import Combiner
 
 
 class MyMapper(Mapper):
+
+	def line_grep(self):
+		return re.compile('google.com')
+
 	def map(self, decoded):
 		url = decoded['REQUEST'].get('prior_referrer', '')
 		blog_id = decoded['REQUEST'].get('blog_id', '')

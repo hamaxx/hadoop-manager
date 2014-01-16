@@ -101,7 +101,12 @@ class class hdpmanager.HadoopFs(hadoop_manager)
       Parameters:
          **path** -- path to the files
 
-class class hdpmanager.Mapper(input_stream=<open file '<stdin>', mode 'r' at 0x2b83e4a4e0c0>, output_stream=<open file '<stdout>', mode 'w' at 0x2b83e4a4e150>)
+class class hdpmanager.Mapper(*args, **kwargs)
+
+   line_grep()
+
+      Override this method to return the compiled regex, string or
+      list of strings that each mapped line must match
 
    map(line)
 
@@ -112,7 +117,7 @@ class class hdpmanager.Mapper(input_stream=<open file '<stdin>', mode 'r' at 0x2
          **line** -- one line of the input file serialized by the
          input serializer
 
-class class hdpmanager.Reducer(input_stream=<open file '<stdin>', mode 'r' at 0x2b83e4a4e0c0>, output_stream=<open file '<stdout>', mode 'w' at 0x2b83e4a4e150>)
+class class hdpmanager.Reducer(input_stream=<open file '<stdin>', mode 'r' at 0x2b5c3447a0c0>, output_stream=<open file '<stdout>', mode 'w' at 0x2b5c3447a150>)
 
    reduce(key, values)
 
@@ -124,7 +129,7 @@ class class hdpmanager.Reducer(input_stream=<open file '<stdin>', mode 'r' at 0x
 
          * **values** -- list of values retuned by the mapper
 
-class class hdpmanager.Combiner(input_stream=<open file '<stdin>', mode 'r' at 0x2b83e4a4e0c0>, output_stream=<open file '<stdout>', mode 'w' at 0x2b83e4a4e150>)
+class class hdpmanager.Combiner(input_stream=<open file '<stdin>', mode 'r' at 0x2b5c3447a0c0>, output_stream=<open file '<stdout>', mode 'w' at 0x2b5c3447a150>)
 
    reduce(key, values)
 

@@ -177,8 +177,14 @@ Create it with the HadoopManager.create_job methos</p>
 
 <dl class="class">
 <dt id="hdpmanager.Mapper">
-<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Mapper</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2b328dc410c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2b328dc41150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Mapper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Mapper</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#hdpmanager.Mapper" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
+<dt id="hdpmanager.Mapper.line_grep">
+<tt class="descname">line_grep</tt><big>(</big><big>)</big><a class="headerlink" href="#hdpmanager.Mapper.line_grep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override this method to return the compiled regex, string or list of strings that each mapped line must match</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="hdpmanager.Mapper.map">
 <tt class="descname">map</tt><big>(</big><em>line</em><big>)</big><a class="headerlink" href="#hdpmanager.Mapper.map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override this methos for mapping the input line
@@ -197,7 +203,7 @@ Output can be either returned or yielded as a key, value pair</p>
 
 <dl class="class">
 <dt id="hdpmanager.Reducer">
-<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Reducer</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2b328dc410c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2b328dc41150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Reducer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Reducer</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2b0d6b7310c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2b0d6b731150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Reducer" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="hdpmanager.Reducer.reduce">
 <tt class="descname">reduce</tt><big>(</big><em>key</em>, <em>values</em><big>)</big><a class="headerlink" href="#hdpmanager.Reducer.reduce" title="Permalink to this definition">¶</a></dt>
@@ -221,7 +227,7 @@ Output can be either returned or yielded as a key, value pair</p>
 
 <dl class="class">
 <dt id="hdpmanager.Combiner">
-<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Combiner</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2b328dc410c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2b328dc41150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Combiner" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">hdpmanager.</tt><tt class="descname">Combiner</tt><big>(</big><em>input_stream=&lt;open file '&lt;stdin&gt;'</em>, <em>mode 'r' at 0x2b0d6b7310c0&gt;</em>, <em>output_stream=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x2b0d6b731150&gt;</em><big>)</big><a class="headerlink" href="#hdpmanager.Combiner" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="hdpmanager.Combiner.reduce">
 <tt class="descname">reduce</tt><big>(</big><em>key</em>, <em>values</em><big>)</big><a class="headerlink" href="#hdpmanager.Combiner.reduce" title="Permalink to this definition">¶</a></dt>
