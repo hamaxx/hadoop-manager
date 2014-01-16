@@ -51,11 +51,13 @@ class _CachingProtocol(object):
 
 class PickleProtocol(_CachingProtocol):
 
+	_TRAILING_CHARS = '\n.' # All pickle strings end with these
+
 	def _dumps(self, o):
-		return pickle.dumps(o).encode('string_escape')
+		return pickle.dumps(o).rsplit(self._TRAILING_CHARS)[0].encode('string_escape')
 
 	def _loads(self, s):
-		return pickle.loads(s.decode('string_escape'))
+		return pickle.loads(s.decode('string_escape') + self._TRAILING_CHARS)
 
 class JsonProtocol(_CachingProtocol):
 

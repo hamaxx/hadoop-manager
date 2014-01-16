@@ -5,6 +5,7 @@ import traceback
 
 from streamer import Streamer
 
+class _Empty(): pass
 
 class Reducer(Streamer):
 
@@ -43,7 +44,7 @@ class Reducer(Streamer):
 		return key, values
 
 	def parse_input(self):
-		last_key = None
+		last_key = _Empty
 		all_values = []
 
 		for line in self._input_stream:
@@ -52,12 +53,12 @@ class Reducer(Streamer):
 			except AttributeError:
 				continue
 
-			if last_key != key and last_key != None:
+			if last_key != key and not last_key is _Empty:
 				self._try_reduce(last_key, all_values)
 				all_values = []
 
 			last_key = key
 			all_values += values
 
-		if last_key is not None:
+		if not last_key is _Empty:
 			self._try_reduce(last_key, all_values)
