@@ -86,7 +86,9 @@ class HadoopJob(object):
 
 		env_files = self._hadoop_env.env_files
 
-		env = {'PYTHONPATH': 'PYTHONPATH=:%s' % (os.pathsep.join([e[1] for e in env_files]))}
+		env = {
+			'PYTHONPATH': (os.pathsep.join([e[1] for e in env_files])),
+		}
 
 		if self._conf_file:
 			shutil.copy2(self._conf_file, os.path.basename(self._conf_file))
