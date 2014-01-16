@@ -67,10 +67,10 @@ class JsonProtocol(_CachingProtocol):
 
 class RawProtocol(object):
 
-	def encode(self, o):
+	def encode(self, o, cache_idx=-1):
 		return o
 
-	def decode(self, s):
+	def decode(self, s, cache_idx=-1):
 		return s
 
 def get_protocol_from_name(name):
