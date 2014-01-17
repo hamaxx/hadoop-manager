@@ -96,23 +96,15 @@ class HadoopEnv(object):
 
 		return [(egg_filename, os.path.join(opt_dict['dist_dir'][1], egg_filename))]
 
-	def _get_module_package(self, module):
-		import importlib
+	def _get_module_package(self, package, path):
 		import shutil
-
-		mod = importlib.import_module(module)
-
-		try:
-			path = mod.__path__[0]
-		except AttributeError:
-			path = mod.__file__
 
 		pkg_dir = self._hdpm._get_tmp_dir('pkg')
 
 		if os.path.isdir(path):	# Package in a folder
-			shutil.make_archive(os.path.join(pkg_dir, mod.__package__), 'zip', os.path.normpath(os.path.join(path, '..')), mod.__package__)
-			fname = os.path.join(pkg_dir, '%s.zip' % mod.__package__)
-			dname = os.path.join('lib', '%s.zip' % mod.__package__)
+			shutil.make_archive(os.path.join(pkg_dir, package), 'zip', os.path.normpath(os.path.join(path, '..')), package)
+			fname = os.path.join(pkg_dir, '%s.zip' % package)
+			dname = os.path.join('lib', '%s.zip' % package)
 			return dname, os.path.abspath(fname)
 
 		elif os.path.splitext(os.path.split(path)[0])[1] == '.egg': # Package in an egg
@@ -126,11 +118,20 @@ class HadoopEnv(object):
 
 	def _package_requires(self):
 		# Prototype. Should work sometimes.
+		import importlib
 
 		packages = []
 		for module in self._requires:
 			if isinstance(module, (unicode, str)):
-				packages.append(self._get_module_package(module))
+				mod = importlib.import_module(module)
+				try:
+					path = mod.__path__[0]
+				except AttributeError:
+					path = mod.__file__
+				packages.append(self._get_module_package(mod.__package__, path))
+			elif isinstance(module, tuple):
+				package, path = module
+				packages.append(self._get_module_package(package, path))
 			else:
 				raise Exception('Invalid requirement parameter')
 
