@@ -9,7 +9,7 @@ from protocol import get_protocol_from_name
 
 DEFAULT_INPUT_SERIALIZED = 'json'
 DEFAULT_OUTPUT_SERIALIZED = 'json'
-DEFAULT_INTER_SERIALIZED = 'pickle'
+DEFAULT_INTER_SERIALIZED = 'json'
 
 
 class Streamer(object):
