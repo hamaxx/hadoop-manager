@@ -120,7 +120,7 @@ class HadoopEnv(object):
 			return os.path.basename(egg_path), egg_path
 
 		elif os.path.splitext(path)[1] == '.so': # Binary module
-			return os.path.basename(path), os.path.dirname(os.path.abspath(path))
+			return os.path.basename(path), os.path.abspath(path), os.path.dirname(os.path.abspath(path))
 
 		raise Exception('Unsupported package type')
 

@@ -55,12 +55,12 @@ if __name__ == "__main__":
 			job_env=dict(requires=['ujson']),
 		)
 
-	job.rm_output()
-	job.run()
-	print '\n'.join(str(l) for l in job.cat_output())
+	#job.rm_output()
+	#job.run()
+	#print '\n'.join(str(l) for l in job.cat_output())
 
-	#job._input_paths = ['test_scripts/test_in.json']
-	#job._output_path = 'out.txt'
-	#job.run_local()
+	job._input_paths = ['test_scripts/test_in.json']
+	job._output_path = 'out.txt'
+	job.run_local()
 
 
