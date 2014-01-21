@@ -43,7 +43,7 @@ class HadoopManager(object):
 	HadoopRunException = HadoopRunException
 
 	def __init__(self, hadoop_home, hadoop_fs_default_name=None, hadoop_job_tracker=None):
-		tmp_directory = '%s-%s/' % (HDP_DIR_PREFIX, str(uuid.uuid4()))
+		tmp_directory = '%s_%s/' % (HDP_DIR_PREFIX, str(uuid.uuid4()))
 		self._tmp_dir = os.path.join(HDP_TMP_DIR, tmp_directory)
 
 		self._hadoop_home = hadoop_home
