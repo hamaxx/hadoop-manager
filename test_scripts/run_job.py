@@ -31,13 +31,12 @@ class MyCombiner(Combiner):
 
 if __name__ == "__main__":
 
-	mng = HadoopManager(
-			hadoop_home='/opt/cloudera/parcels/CDH-4.2.0-1.cdh4.2.0.p0.10',
-			hadoop_fs_default_name='hdfs://zedoop/',
-			hadoop_job_tracker='hdp01.zemanta.com:8021',
-		)
+	with HadoopManager(
+		hadoop_home='/opt/cloudera/parcels/CDH-4.2.0-1.cdh4.2.0.p0.10',
+		hadoop_fs_default_name='hdfs://zedoop/',
+		hadoop_job_tracker='hdp01.zemanta.com:8021') as mng:
 
-	job = mng.create_job(
+		job = mng.create_job(
 			input_paths=['/user/badger/logs/pageviews/pageviews-2014-01-10_00001'],
 			output_path='/user/ham/out.txt',
 
@@ -51,9 +50,9 @@ if __name__ == "__main__":
 			job_env=dict(requires=[('ujson', 'test_scripts/ujson.so')]),
 		)
 
-	job.rm_output()
-	job.run()
-	print '\n'.join(str(l) for l in job.cat_output())
+		job.rm_output()
+		job.run()
+		print '\n'.join(str(l) for l in job.cat_output())
 
 	#job._input_paths = ['test_scripts/test_in.json']
 	#job._output_path = 'out.txt'
