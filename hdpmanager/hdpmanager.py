@@ -10,10 +10,10 @@ from hdpfs import HadoopFs
 HADOOP_STREAMING_JAR_RE = re.compile(r'^hadoop.*streaming.*\.jar$')
 
 # temporary dir are created in HDP_TMP_DIR
-HDP_TMP_DIR = "/tmp"
+HDP_TMP_DIR = "/tmp/hadoop-manager"
 # each temporary dir gets a randomly generated uuid suffix 
-# example: /tmp/hadoop-manager-02e0d565-5924-419b-ae61-4ce3b56fd28b
-HDP_DIR_PREFIX = "hadoop-manager"
+# example: /tmp/hadoop-manager/job-02e0d565-5924-419b-ae61-4ce3b56fd28b
+HDP_DIR_PREFIX = "job"
 
 class HadoopRunException(Exception):
 
