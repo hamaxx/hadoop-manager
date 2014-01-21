@@ -2,13 +2,15 @@ import os
 import re
 import shutil
 import subprocess
+import uuid
 
 from hdpjob import HadoopJob
 from hdpfs import HadoopFs
 
-
 HADOOP_STREAMING_JAR_RE = re.compile(r'^hadoop.*streaming.*\.jar$')
-TMP_FOLDER = '/tmp/hadoop-manager/'
+
+HDP_TMP_DIR = "/tmp"
+HDP_DIR_PREFIX = "hadoop-manager"
 
 class HadoopRunException(Exception):
 
@@ -34,7 +36,10 @@ class HadoopManager(object):
 	HadoopRunException = HadoopRunException
 
 	def __init__(self, hadoop_home, hadoop_fs_default_name=None, hadoop_job_tracker=None):
-		self._rm_tmp_dir()
+		tmp_directory = '%s-%s/' % (HDP_DIR_PREFIX, str(uuid.uuid4()))
+		self._tmp_dir = os.path.join(HDP_TMP_DIR, tmp_directory)
+
+		self._rm_tmp_dirs()
 
 		self._hadoop_home = hadoop_home
 		self._hadoop_fs_default_name = hadoop_fs_default_name
@@ -141,14 +146,16 @@ class HadoopManager(object):
 			yield o
 
 	def _get_tmp_dir(self, subdir=None):
-		path = TMP_FOLDER
+		path = self._tmp_dir
 		if subdir:
 			path = os.path.join(path, subdir)
 		if not os.path.exists(path):
 			os.makedirs(path)
 		return path
 
-	def _rm_tmp_dir(self):
-		if os.path.exists(TMP_FOLDER):
-			shutil.rmtree(TMP_FOLDER)
-
+	def _rm_tmp_dirs(self):
+		tmp_hdp_dirs = [d for d in os.listdir(HDP_TMP_DIR) if \
+		os.path.isdir(os.path.join(HDP_TMP_DIR, d)) and d.startswith(HDP_DIR_PREFIX)]
+		# if path cannot be deleted an exception will fire
+		for tmp_hdp_dir in tmp_hdp_dirs:
+			shutil.rmtree(os.path.join(HDP_TMP_DIR, tmp_hdp_dir),ignore_errors = False)
