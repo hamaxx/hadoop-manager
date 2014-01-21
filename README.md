@@ -11,7 +11,7 @@ Python wrapper around Hadoop streaming jar.
 
 ###Docs:
 
-[Hadoop-manager docs](http://pythonhosted.org/pysandra-unit/)
+[Hadoop-manager docs](docs/_build/text/index.txt)
 
 
 ###Basic Example
