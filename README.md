@@ -34,32 +34,32 @@ Python wrapper around Hadoop streaming jar.
 
 	if __name__ == "__main__":
 
-		mng = HadoopManager(
+		with HadoopManager(
 				hadoop_home='/opt/cloudera/parcels/CDH-4.2.0-1.cdh4.2.0.p0.10',
 				hadoop_fs_default_name='hdfs://hadoop/',
 				hadoop_job_tracker='hdp01.example.com:8021',
-			)
+			) as mng:
 
-		job = mng.create_job(
-				input_paths=['/user/ham/logs/test'],
-				output_path='/user/ham/out',
+			job = mng.create_job(
+					input_paths=['/user/ham/logs/test'],
+					output_path='/user/ham/out',
 
-				root_package='testapp',
+					root_package='testapp',
 
-				mapper='hdptest.job.MyMapper',
-				reducer='hdptest.job.MyReducer',
-				combiner='hdptest.job.MyCombiner',
-				num_reducers=10,
+					mapper='hdptest.job.MyMapper',
+					reducer='hdptest.job.MyReducer',
+					combiner='hdptest.job.MyCombiner',
+					num_reducers=10,
 
-				serialization=dict(input='json', output='json'),
+					serialization=dict(input='json', output='json'),
+	
+					job_env=dict(requires=['simplejson']),
+				)
 
-				job_env=dict(requires=['simplejson']),
-			)
+			job.rm_output()
+	
+			job.run()
 
-		job.rm_output()
-
-		job.run()
-
-		for l in job.cat_output():
-			print l
+			for l in job.cat_output():
+				print l
 

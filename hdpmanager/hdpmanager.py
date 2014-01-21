@@ -9,7 +9,10 @@ from hdpfs import HadoopFs
 
 HADOOP_STREAMING_JAR_RE = re.compile(r'^hadoop.*streaming.*\.jar$')
 
+# temporary dir are created in HDP_TMP_DIR
 HDP_TMP_DIR = "/tmp"
+# each temporary dir gets a randomly generated uuid suffix 
+# example: /tmp/hadoop-manager-02e0d565-5924-419b-ae61-4ce3b56fd28b
 HDP_DIR_PREFIX = "hadoop-manager"
 
 class HadoopRunException(Exception):
@@ -28,6 +31,10 @@ class HadoopManager(object):
 	"""
 	HadoopManager is a central object for managing hadoop jobs and hdfs
 
+	In order to perform proper temporary directory cleanup use HadoopManager with 'with' statement.
+	with HadoopManager(...) as manager:
+		pass
+
 	:param hadoop_home: home folder of hadoop package
 	:param hadoop_fs_default_name: default hdfs home used when paths provided are relative
 	:param hadoop_job_tracker: hadoop job tracker host:port
@@ -39,8 +46,6 @@ class HadoopManager(object):
 		tmp_directory = '%s-%s/' % (HDP_DIR_PREFIX, str(uuid.uuid4()))
 		self._tmp_dir = os.path.join(HDP_TMP_DIR, tmp_directory)
 
-		self._rm_tmp_dirs()
-
 		self._hadoop_home = hadoop_home
 		self._hadoop_fs_default_name = hadoop_fs_default_name
 		self._hadoop_job_tracker = hadoop_job_tracker
@@ -49,6 +54,12 @@ class HadoopManager(object):
 		self._hadoop_stream_jar = self._find_streaming_jar()
 
 		self._fs = HadoopFs(self)
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, type, value, traceback):
+		self._rm_tmp_dir()
 
 	@property
 	def fs(self):
@@ -153,9 +164,6 @@ class HadoopManager(object):
 			os.makedirs(path)
 		return path
 
-	def _rm_tmp_dirs(self):
-		tmp_hdp_dirs = [d for d in os.listdir(HDP_TMP_DIR) if \
-		os.path.isdir(os.path.join(HDP_TMP_DIR, d)) and d.startswith(HDP_DIR_PREFIX)]
-		# if path cannot be deleted an exception will fire
-		for tmp_hdp_dir in tmp_hdp_dirs:
-			shutil.rmtree(os.path.join(HDP_TMP_DIR, tmp_hdp_dir),ignore_errors = False)
+	def _rm_tmp_dir(self):
+		if os.path.exists(self._tmp_dir):
+			shutil.rmtree(self._tmp_dir,ignore_errors=True)
