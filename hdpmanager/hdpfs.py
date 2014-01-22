@@ -20,7 +20,11 @@ class HadoopFs(object):
 			line = line.rstrip()
 
 			if tab_separated:
-				yield tuple(output_serializer.decode(part) for part in line.split('\t'))
+				ls = line.split('\t')
+				if len(ls) > 1:
+					yield tuple(output_serializer.decode(part) for part in line.split('\t'))
+				else:
+					yield output_serializer.decode(line)
 			else:
 				yield output_serializer.decode(line)
 

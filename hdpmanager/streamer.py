@@ -1,5 +1,6 @@
 import os
 import sys
+import types
 import cPickle as pickle
 
 from counter import Counter
@@ -56,19 +57,21 @@ class Streamer(object):
 
 		self._set_serializers(serializers)
 
-	def _out(self, outputs):
+	def _out(self, outputs, enforce_tuple=False):
 		if not outputs:
 			return
 
-		if isinstance(outputs, tuple):
+		if not isinstance(outputs, types.GeneratorType):
 			outputs = [outputs]
 
 		for output in outputs:
-			if not isinstance(output, tuple):
-				raise Exception('Invalid output')
-
-			output_serialized = [self._write_protocol.encode(x, cache_idx=i) for i, x in enumerate(output)]
-			output_str = '\t'.join(output_serialized)
+			if isinstance(output, tuple):
+				output_serialized = [self._write_protocol.encode(x, cache_idx=i) for i, x in enumerate(output)]
+				output_str = '\t'.join(output_serialized)
+			else:
+				if enforce_tuple:
+					raise Exception('Invalid output')
+				output_str = self._write_protocol.encode(output, cache_idx=1)
 
 			self._output_stream.write(output_str + '\n')
 

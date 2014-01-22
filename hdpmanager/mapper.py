@@ -60,7 +60,7 @@ class Mapper(Streamer):
 				parsed_line = self.parse_line(line)
 				if not parsed_line:
 					continue
-				self._out(self.map(parsed_line))
+				self._out(self.map(parsed_line), enforce_tuple=False)
 			except Exception, e:
 				self.count('error lines', 1)
 				sys.stderr.write('error %s processing line:\n%s\n' % (repr(e), repr(line)))
