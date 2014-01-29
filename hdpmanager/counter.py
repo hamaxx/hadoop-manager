@@ -16,7 +16,8 @@ class Counter(object):
 
 		self._group = group
 
-		self._is_terminal = os.isatty(sys.stderr.fileno())
+		# stderr is not a file in Jenkins
+		self._is_terminal = isinstance(sys.stderr, file) and os.isatty(sys.stderr.fileno())
 		if self._is_terminal:
 			self._flush_interval = FLUSH_INTERVAL_TERMINAL
 			atexit.register(self._flush_terminal, clear=False)
@@ -51,5 +52,3 @@ class Counter(object):
 				self._flush_terminal(counter, clear=False)
 			else:
 				self._flush_file(counter)
-
-
