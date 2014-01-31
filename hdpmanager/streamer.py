@@ -15,14 +15,18 @@ DEFAULT_INTER_SERIALIZED = 'json'
 
 class Streamer(object):
 
-	def __init__(self, input_stream=sys.stdin, output_stream=sys.stdout):
+	def __init__(self, input_stream=sys.stdin, output_stream=sys.stdout, conf=None):
 		self._input_stream = input_stream
 		self._output_stream = output_stream
 
 		self._read_protocol = None
 		self._write_protocol = None
 
-		self.conf = self._get_env_conf(CONF_PICKE_FILE_PATH)
+		if conf:
+			# Mostly useful for passing conf in tests
+			self.conf = conf
+		else:
+			self.conf = self._get_env_conf(CONF_PICKE_FILE_PATH)
 
 		counter = Counter(self.__class__.__name__)
 		self._count = counter.count
