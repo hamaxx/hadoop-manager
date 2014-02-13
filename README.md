@@ -1,4 +1,4 @@
-hadoop-manager
+hadoop-manager (alpha)
 ====
 
 Python wrapper around Hadoop streaming jar.

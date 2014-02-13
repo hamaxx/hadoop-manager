@@ -33,7 +33,7 @@ class Streamer(object):
 
 		self._parse_serializers()
 
-	def count(self, name, incr):
+	def count(self, name, incr=1):
 		"""
 		Hadoop counter
 
