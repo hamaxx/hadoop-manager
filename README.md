@@ -6,12 +6,12 @@ Python wrapper around Hadoop streaming jar.
 
 ###Install:
 
-	pip install git+ssh://git@github.com/Zemanta/hadoop-manager
+	pip install hadoop-manager
 
 
 ###Docs:
 
-[Hadoop-manager docs](docs/_build/text/index.txt)
+[Hadoop-manager docs](https://pythonhosted.org/hadoop-manager/)
 
 
 ###Basic Example
