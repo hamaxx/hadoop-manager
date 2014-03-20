@@ -12,12 +12,13 @@ ZHDUTILS_PACKAGE = 'hdpmanager'
 
 class HadoopEnv(object):
 
-	def __init__(self, hdp_manager, packages=None, package_data=None, requires=None, root_package=None):
+	def __init__(self, hdp_manager, packages=None, modules=None, package_data=None, requires=None, root_package=None):
 		self._hdpm = hdp_manager
 
 		self._root_package = root_package
 
-		self._packages = packages or []
+		self._packages = packages
+		self._modules = modules
 		self._package_data = package_data
 
 		self._requires = requires or []
@@ -42,12 +43,18 @@ class HadoopEnv(object):
 		import setuptools
 		return setuptools.find_packages(exclude=[ZHDUTILS_PACKAGE])
 
+	def _find_modules(self):
+		import pkgutil
+		return [name for _, name, ispkg in pkgutil.iter_modules('.') if not ispkg]
+
 	def _package(self):
 		cwd = os.getcwd()
 		self._setup_working_dir()
 
-		if not self._packages:
+		if self._packages is None:
 			self._packages = self._find_packages()
+		if self._modules is None:
+			self._modules = self._find_modules()
 
 		packaged_egg = self._build_egg()
 		packaged_requires = self._package_requires()
@@ -69,6 +76,8 @@ class HadoopEnv(object):
 
 		if self._packages:
 			attrs['packages'] = self._packages
+		if self._modules:
+			attrs['py_modules'] = self._modules
 		if self._package_data:
 			attrs['package_data'] = self._package_data
 
