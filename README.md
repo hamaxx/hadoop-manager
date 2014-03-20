@@ -23,7 +23,7 @@ Python wrapper around Hadoop streaming jar.
 
 	class MyMapper(Mapper):
 		def map(self, decoded):
-			yield (decoded.site, decoded.host), 1
+			yield (decoded['site'], decoded['host']), 1
 			self.count('map_ok', 1)
 
 	class MyReducer(Reducer):
@@ -46,18 +46,17 @@ Python wrapper around Hadoop streaming jar.
 
 					root_package='testapp',
 
-					mapper='hdptest.job.MyMapper',
-					reducer='hdptest.job.MyReducer',
-					combiner='hdptest.job.MyCombiner',
-					num_reducers=10,
+					mapper='job_module.MyMapper',
+					reducer='job_module.MyReducer',
+					num_reducers=1,
 
 					serialization=dict(input='json', output='json'),
-	
+
 					job_env=dict(requires=['simplejson']),
 				)
 
 			job.rm_output()
-	
+
 			job.run()
 
 			for l in job.cat_output():
