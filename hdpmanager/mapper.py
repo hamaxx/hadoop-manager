@@ -6,6 +6,17 @@ import re
 
 from streamer import Streamer
 
+
+class EmptyMapper(Streamer):
+
+	def _set_serializers(self, serializers):
+		pass
+
+	def parse_input(self):
+		for line in self._input_stream:
+			self._output_stream.write(line + '\n')
+
+
 class Mapper(Streamer):
 
 	def __init__(self, *args, **kwargs):

@@ -1,5 +1,8 @@
 import os
+import pwd
 import re
+import datetime
+import uuid
 import cPickle as pickle
 
 import subprocess
@@ -10,12 +13,16 @@ ZHDUTILS_PACKAGE = 'hdpmanager'
 EGG_NAME = 'zemanta_hadoop_job'
 EGG_VERSION = '1.0'
 
-DEFAUT_NUM_REDUCERS = 10
+DEFAUT_NUM_REDUCERS = 1
 
 HADOOP_STREAMING_JAR_RE = re.compile(r'^hadoop.*streaming.*\.jar$')
 
 CONF_PICKE_FILE_PATH = 'streamer_conf.pickle'
 SERIALIZATION_CONF_PICKE_FILE_PATH = 'serialization_conf.pickle'
+
+DEFAULT_MAPPER = 'hdpmanager.mapper.EmptyMapper'
+
+HDFS_TMP_DIR_PREFIX = '/tmp/hdpmanager'
 
 
 class HadoopJob(object):
@@ -24,12 +31,15 @@ class HadoopJob(object):
 	Create it with the HadoopManager.create_job methos
 	"""
 
-	def __init__(self, hdp_manager, input_paths, output_path, mapper, reducer=None, combiner=None, num_reducers=None, serialization=None, job_env=None, conf=None, root_package=None):
+	def __init__(self, hdp_manager,
+			input_paths=None, input_jobs=None, output_path=None, mapper=None, reducer=None,
+			combiner=None, num_reducers=None, serialization=None, conf=None,
+			job_env=None, root_package=None):
+
+		if not input_jobs and not input_paths:
+			raise AttributeError('Both input_jobs and input_paths cannot be None')
 
 		self._hdpm = hdp_manager
-
-		self._input_paths = input_paths
-		self._output_path = output_path
 
 		self._root_package = root_package
 
@@ -38,6 +48,12 @@ class HadoopJob(object):
 		self._reducer = reducer
 		self._num_reducers = num_reducers or DEFAUT_NUM_REDUCERS
 
+		self._job_name = self._make_job_name()
+
+		self._output_path = output_path or self._get_hdfs_tmp_dir()
+		self._input_paths = input_paths
+		self._input_jobs = input_jobs
+
 		self._serialization_conf = serialization
 		self._serialization_conf_file = self._create_conf_file(serialization, SERIALIZATION_CONF_PICKE_FILE_PATH)
 
@@ -45,6 +61,20 @@ class HadoopJob(object):
 		self._conf_file = self._create_conf_file(conf, CONF_PICKE_FILE_PATH)
 
 		self._hadoop_env = HadoopEnv(hdp_manager, root_package=self._root_package, **(job_env or {}))
+
+	def _make_job_name(self):
+		now = datetime.datetime.utcnow().strftime('%H-%M-%S')
+
+		user = pwd.getpwuid(os.getuid())[0]
+		scripts = '-'.join(set([p.split('.')[0] for p in [self._mapper, self._reducer, self._combiner] if p]))
+
+		random = uuid.uuid4().hex[:10]
+
+		return '.'.join([user, scripts, now, random])
+
+	def _get_hdfs_tmp_dir(self):
+		today = datetime.date.today().isoformat()
+		return os.path.join(HDFS_TMP_DIR_PREFIX, today, self._job_name)
 
 	def _create_conf_file(self, conf, fp):
 		if not conf:
@@ -65,7 +95,7 @@ class HadoopJob(object):
 			return 'python', '-c', 'from %s import %s; %s()._run()' % (module, class_name, class_name)
 
 	def _get_mapper_command(self, encoded=True):
-		return self._get_streamer_command(self._mapper, encoded)
+		return self._get_streamer_command(self._mapper or DEFAULT_MAPPER, encoded)
 
 	def _get_reducer_command(self, encoded=True):
 		if not self._reducer:
@@ -76,59 +106,6 @@ class HadoopJob(object):
 		if not self._combiner:
 			return
 		return self._get_streamer_command(self._combiner, encoded)
-
-	def run_local(self):
-		"""
-		Run job in a local simulated environment
-		"""
-
-		import shutil
-
-		env_files = self._hadoop_env.env_files
-
-		env = {
-			'PYTHONPATH': (os.pathsep.join([e[-1] for e in env_files])),
-		}
-
-		if self._conf_file:
-			shutil.copy2(self._conf_file, os.path.basename(self._conf_file))
-		if self._serialization_conf_file:
-			shutil.copy2(self._serialization_conf_file, os.path.basename(self._serialization_conf_file))
-
-		mapper = subprocess.Popen(self._get_mapper_command(False), env=env, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-
-		for path in self._input_paths:
-			for line in open(path):
-				mapper.stdin.write(line)
-		mapper.stdin.close()
-
-		out_stream = mapper.stdout.read()
-
-		if self._combiner:
-			combiner = subprocess.Popen(self._get_combiner_command(False), env=env, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-
-			for line in sorted(out_stream.split('\n')):
-				combiner.stdin.write(line + '\n')
-			combiner.stdin.close()
-
-			out_stream = combiner.stdout.read()
-
-		if self._reducer:
-			reducer = subprocess.Popen(self._get_reducer_command(False), env=env, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-
-			for line in sorted(out_stream.split('\n')):
-				reducer.stdin.write(line + '\n')
-			reducer.stdin.close()
-
-			out_stream = reducer.stdout.read()
-
-		if self._conf_file:
-			os.remove(os.path.basename(self._conf_file))
-		if self._serialization_conf_file:
-			os.remove(os.path.basename(self._serialization_conf_file))
-
-		with open(self._output_path, 'w') as of:
-			of.write(out_stream)
 
 	def rm_output(self):
 		"""
@@ -149,10 +126,35 @@ class HadoopJob(object):
 		output_serializer = (self._serialization_conf or {}).get('output', DEFAULT_OUTPUT_SERIALIZED)
 		return self._hdpm.fs.cat(os.path.join(self._output_path, 'part-*'), serializer=output_serializer, tab_separated=True)
 
+	def get_output_path(self):
+		return self._output_path
+
+	def _get_all_input_paths(self):
+		inputs = []
+
+		if self._input_jobs:
+			inputs += [ij.get_output_path() for ij in self._input_jobs]
+
+		if self._input_paths:
+			inputs += self._input_paths
+
+		return inputs
+
+	def _run_dependent_jobs(self):
+		if not self._input_jobs:
+			return
+
+		for ij in self._input_jobs:
+			# TODO make concurent
+			ij.rm_output()
+			ij.run()
+
 	def run(self):
 		"""
 		Run a mapreduce job
 		"""
+
+		self._run_dependent_jobs()
 
 		env_files = self._hadoop_env.env_files
 
@@ -161,7 +163,7 @@ class HadoopJob(object):
 		attrs = [
 			('-mapper', self._get_mapper_command()),
 
-			('-input', [path for path in self._input_paths]),
+			('-input', self._get_all_input_paths()),
 			('-output', self._output_path),
 
 			('-cmdenv', 'PYTHONPATH=:%s' % (os.pathsep.join([e[0] for e in env_files]))),
