@@ -13,7 +13,8 @@ class HadoopFs(object):
 		:param serializer: input serializer. Options are json, pickle and raw(default)
 		:param tab_seperated: boolean if input is tab separated
 		"""
-		output = self._hdpm._run_hadoop_cmd('fs', ('-cat', path))
+		job = self._hdpm._run_hadoop_cmd('fs', ('-cat', path))
+		output = job.yield_stdout()
 		output_serializer = get_protocol_from_name(serializer)
 
 		for line in output:
@@ -28,10 +29,14 @@ class HadoopFs(object):
 			else:
 				yield output_serializer.decode(line)
 
+		job.join()
+
 	def rm(self, path):
 		"""
 		Recursively remove all files on the path
 
 		:param path: path to the files
 		"""
-		self._hdpm._run_hadoop_cmd_echo('fs', ('-rm', '-r', path))
+		job = self._hdpm._run_hadoop_cmd('fs', ('-rm', '-r', path))
+		job.print_stdout()
+		job.join()

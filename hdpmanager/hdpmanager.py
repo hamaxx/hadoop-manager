@@ -15,6 +15,7 @@ HDP_TMP_DIR = "/tmp/hadoop-manager"
 # example: /tmp/hadoop-manager/job-02e0d565-5924-419b-ae61-4ce3b56fd28b
 HDP_DIR_PREFIX = "job"
 
+
 class HadoopRunException(Exception):
 
 	def __init__(self, msg, stderr=None):
@@ -26,6 +27,29 @@ class HadoopRunException(Exception):
 		if self.stderr:
 			err += '\n' + self.stderr.read()
 		return err
+
+
+class HadoopCmdPromise(object):
+
+	def __init__(self, subprocess):
+		self._subprocess = subprocess
+
+	def join(self):
+		self._subprocess.wait()
+		if self._subprocess.returncode != 0:
+			raise HadoopRunException('Running hadoop command failed with code %s!' % self._subprocess.returncode, stderr=self._subprocess.stderr)
+
+	def yield_stdout(self):
+		while True:
+			o = self._subprocess.stdout.readline()
+			if not o:
+				break
+			yield o
+
+	def print_stdout(self):
+		for l in self.yield_stdout():
+			print l,
+
 
 class HadoopManager(object):
 	"""
@@ -126,11 +150,6 @@ class HadoopManager(object):
 
 		return [str(c) for c in cmd]
 
-	def _run_hadoop_cmd_echo(self, command, attrs, job_name=None):
-		for line in self._run_hadoop_cmd(command, attrs, job_name):
-			print line,
-		print
-
 	def _run_hadoop_cmd(self, command, attrs, job_name=None):
 		cmd = [self._hadoop_bin]
 
@@ -140,7 +159,6 @@ class HadoopManager(object):
 			cmd += ['-D', 'fs.defaultFS=%s' % self._hadoop_fs_default_name,]
 		if self._hadoop_job_tracker:
 			cmd += ['-D', 'mapred.job.tracker=%s' % self._hadoop_job_tracker,]
-
 		if job_name:
 			cmd += ['-D', 'mapred.job.name=%s' % job_name]
 
@@ -149,21 +167,8 @@ class HadoopManager(object):
 		for attr in attrs:
 			cmd += self._get_cmd_list(attr)
 
-		hadoop = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-		for line in self._yield_lines(hadoop.stdout):
-			yield line
-
-		hadoop.wait()
-		if hadoop.returncode != 0:
-			raise HadoopRunException('Running hadoop command failed with code %s!' % hadoop.returncode, stderr=hadoop.stderr)
-
-	def _yield_lines(self, pipe):
-		while True:
-			o = pipe.readline()
-			if not o:
-				break
-			yield o
+		hdp_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		return HadoopCmdPromise(hdp_process)
 
 	def _make_tmp_dir_path(self):
 		tmp_directory = '%s_%s/' % (HDP_DIR_PREFIX, uuid.uuid4().hex)

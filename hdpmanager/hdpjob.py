@@ -4,8 +4,7 @@ import re
 import datetime
 import uuid
 import cPickle as pickle
-
-import subprocess
+import threading
 
 from hdpenv import HadoopEnv
 
@@ -147,16 +146,24 @@ class HadoopJob(object):
 		if not self._input_jobs:
 			return
 
+		promises = []
 		for ij in self._input_jobs:
-			# TODO make concurent
 			ij.rm_output()
-			ij.run()
+			promises.append(ij.run_async())
 
-	def run(self):
-		"""
-		Run a mapreduce job
-		"""
+		for promise in promises:
+			promise.join()
 
+	def _stdout_print_async(self, promise):
+		t = threading.Thread(target=promise.print_stdout)
+		t.daemon = True
+		t.start()
+
+	def run_async(self):
+		"""
+		Run a mapreduce job in background
+		Returns a HadoopCmdPromise object
+		"""
 		self._run_dependent_jobs()
 
 		env_files = self._hadoop_env.env_files
@@ -181,4 +188,17 @@ class HadoopJob(object):
 			('-file', self._serialization_conf_file),
 		]
 
-		self._hdpm._run_hadoop_cmd_echo(cmd, attrs, self._job_name)
+		job_promise = self._hdpm._run_hadoop_cmd(cmd, attrs, self._job_name)
+
+		self._stdout_print_async(job_promise)
+
+		return job_promise
+
+
+	def run(self):
+		"""
+		Run a mapreduce job
+		"""
+
+		job_promise = self.run_async()
+		job_promise.join()
