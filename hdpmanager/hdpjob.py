@@ -68,7 +68,7 @@ class HadoopJob(object):
 		user = pwd.getpwuid(os.getuid())[0]
 		scripts = '-'.join(set([p.split('.')[0] for p in [self._mapper, self._reducer, self._combiner] if p]))
 
-		random = uuid.uuid4().hex[:10]
+		random = uuid.uuid4().hex[:5]
 
 		return '.'.join([user, scripts, now, random])
 
@@ -127,6 +127,9 @@ class HadoopJob(object):
 		return self._hdpm.fs.cat(os.path.join(self._output_path, 'part-*'), serializer=output_serializer, tab_separated=True)
 
 	def get_output_path(self):
+		"""
+		Returns path to the output file. Usefull when temporary dir is used
+		"""
 		return self._output_path
 
 	def _get_all_input_paths(self):
@@ -178,4 +181,4 @@ class HadoopJob(object):
 			('-file', self._serialization_conf_file),
 		]
 
-		self._hdpm._run_hadoop_cmd_echo(cmd, attrs)
+		self._hdpm._run_hadoop_cmd_echo(cmd, attrs, self._job_name)

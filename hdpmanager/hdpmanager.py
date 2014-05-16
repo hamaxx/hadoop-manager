@@ -126,12 +126,12 @@ class HadoopManager(object):
 
 		return [str(c) for c in cmd]
 
-	def _run_hadoop_cmd_echo(self, command, attrs):
-		for line in self._run_hadoop_cmd(command, attrs):
+	def _run_hadoop_cmd_echo(self, command, attrs, job_name=None):
+		for line in self._run_hadoop_cmd(command, attrs, job_name):
 			print line,
 		print
 
-	def _run_hadoop_cmd(self, command, attrs):
+	def _run_hadoop_cmd(self, command, attrs, job_name=None):
 		cmd = [self._hadoop_bin]
 
 		cmd += self._get_cmd_list(command)
@@ -140,6 +140,9 @@ class HadoopManager(object):
 			cmd += ['-D', 'fs.defaultFS=%s' % self._hadoop_fs_default_name,]
 		if self._hadoop_job_tracker:
 			cmd += ['-D', 'mapred.job.tracker=%s' % self._hadoop_job_tracker,]
+
+		if job_name:
+			cmd += ['-D', 'mapred.job.name=%s' % job_name]
 
 		if not isinstance(attrs, list):
 			attrs = [attrs]
