@@ -14,7 +14,9 @@ Python wrapper around Hadoop streaming jar.
 [Hadoop-manager docs](https://pythonhosted.org/hadoop-manager/)
 
 
-###Basic Example
+###Examples
+
+####Basic usecase
 
 	from hdpmanager import HadoopManager
 	from hdpmanager import Mapper
@@ -48,17 +50,41 @@ Python wrapper around Hadoop streaming jar.
 
 					mapper='job_module.MyMapper',
 					reducer='job_module.MyReducer',
-					num_reducers=1,
 
 					serialization=dict(input='json', output='json'),
 
 					job_env=dict(requires=['simplejson']),
 				)
 
-			job.rm_output()
-
 			job.run()
 
 			for l in job.cat_output():
 				print l
 
+####Job chaining
+
+	parent_job_1 = mng.create_job(...)
+	parent_job_2 = mng.create_job(...)
+
+	main_job = mng_create_job(
+		...
+		input_jobs=[parent_job_1, parent_job_2]
+		...
+	)
+
+	main_job.run()
+	out = main_job.cat_output()
+
+####Async job execution
+
+	job_1 = mng.create_job(...)
+	job_2 = mng.create_job(...)
+
+	promise_1 = job_1.run_async()
+	promise_2 = job_2.run_async()
+
+	promise_1.join()
+	promise_2.join()
+
+	out_1 = job_1.cat_output()
+	out_2 = job_2.cat_output()
