@@ -31,6 +31,9 @@ Contents:
 .. autoclass:: Combiner
    :members:
 
+.. autoclass:: HadoopCmdPromise
+   :members:
+
 
 
 Indices and tables

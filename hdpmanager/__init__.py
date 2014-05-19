@@ -7,10 +7,10 @@
 
 __author__ = 'Jure Ham <jure.ham@zemanta.com>'
 
-__all__ = ['HadoopManager', 'HadoopJob', 'HadoopFs', 'Mapper', 'Reducer', 'Combiner']
+__all__ = ['HadoopManager', 'HadoopCmdPromise', 'HadoopJob', 'HadoopFs', 'Mapper', 'Reducer', 'Combiner']
 
 
-from hdpmanager import HadoopManager
+from hdpmanager import HadoopManager, HadoopCmdPromise
 
 from hdpjob import HadoopJob
 from hdpfs import HadoopFs

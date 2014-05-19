@@ -35,11 +35,17 @@ class HadoopCmdPromise(object):
 		self._subprocess = subprocess
 
 	def join(self):
+		"""
+		Block until command/job is completed
+		"""
 		self._subprocess.wait()
 		if self._subprocess.returncode != 0:
 			raise HadoopRunException('Running hadoop command failed with code %s!' % self._subprocess.returncode, stderr=self._subprocess.stderr)
 
 	def yield_stdout(self):
+		"""
+		Yield command's stdout
+		"""
 		while True:
 			o = self._subprocess.stdout.readline()
 			if not o:
@@ -47,6 +53,9 @@ class HadoopCmdPromise(object):
 			yield o
 
 	def print_stdout(self):
+		"""
+		Print command's stdout
+		"""
 		for l in self.yield_stdout():
 			print l,
 
