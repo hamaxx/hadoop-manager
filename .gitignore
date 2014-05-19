@@ -1,6 +1,7 @@
 build
 dist
 zemanta_hadoop_job.egg-info
+docs/_build
 
 
 *.py[cod]
