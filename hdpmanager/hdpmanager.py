@@ -121,6 +121,7 @@ class HadoopManager(object):
         :param job_env: dict which defines environment
                 valid options are packages, package_data and requires
                 if packages aren't provided all packages returned by setuptools.find_packages in root_package will be included
+        :param skip_missing_input_paths: skip input paths with no matching files
         """
         return HadoopJob(self, **kwargs)
 

@@ -33,7 +33,7 @@ class HadoopJob(object):
     def __init__(self, hdp_manager,
                     input_paths=None, input_jobs=None, output_path=None, mapper=None, reducer=None,
                     combiner=None, num_reducers=None, serialization=None, conf=None,
-                    job_env=None, root_package=None):
+                    job_env=None, root_package=None, skip_missing_input_paths=False):
 
         if not input_jobs and not input_paths:
             raise AttributeError('Both input_jobs and input_paths cannot be None')
@@ -52,6 +52,7 @@ class HadoopJob(object):
         self._output_path = output_path or self._get_hdfs_tmp_dir()
         self._input_paths = input_paths
         self._input_jobs = input_jobs
+        self._skip_missing_input_paths = skip_missing_input_paths
 
         self._serialization_conf = serialization
         self._serialization_conf_file = self._create_conf_file(serialization, SERIALIZATION_CONF_PICKE_FILE_PATH)
@@ -140,7 +141,15 @@ class HadoopJob(object):
         if self._input_paths:
             inputs += self._input_paths
 
-        return inputs
+        if self._skip_missing_input_paths:
+            clean_inputs = [inf for inf in inputs if self._hdpm.fs.exists(inf)]
+        else:
+            clean_inputs = inputs
+
+        if not clean_inputs:
+            raise self._hdpm.HadoopRunException('No input files for job.')
+
+        return clean_inputs
 
     def _run_dependent_jobs(self):
         if not self._input_jobs:

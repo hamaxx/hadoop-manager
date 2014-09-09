@@ -1,7 +1,20 @@
+import datetime
+import shlex
+from collections import namedtuple
+
 from protocol import get_protocol_from_name
 
 
+class HadoopFileNotFoundError(IOError):
+    pass
+
+
+_HadoopLsLine = namedtuple('File', ['permissions', 'replicas', 'user', 'group', 'size', 'modified', 'path'])
+
+
 class HadoopFs(object):
+
+    HadoopFileNotFoundError = HadoopFileNotFoundError
 
     def __init__(self, hadoop_manager):
         self._hdpm = hadoop_manager
@@ -41,3 +54,56 @@ class HadoopFs(object):
         job = self._hdpm._run_hadoop_cmd('fs', ('-rm', '-r', path))
         job.print_stdout()
         job.join()
+
+    def _parse_ls_line(self, line):
+        split_line = shlex.split(line)
+        if len(split_line) != 8:
+            return
+
+        modified = datetime.datetime.strptime('%sT%s' % (split_line[5], split_line[6]), '%Y-%m-%dT%H:%M')
+
+        return _HadoopLsLine(
+            permissions=split_line[0],
+            replicas=int(split_line[1].replace('-', '0')),
+            user=split_line[2],
+            group=split_line[3],
+            size=int(split_line[4]),
+            modified=modified,
+            path=split_line[7],
+        )
+
+    def ls(self, path, recursive=False):
+        """
+        Lists files on the path
+
+        :param path: path to the file
+        :param recursive: list subdirectories recursively
+        """
+
+        if recursive:
+            cmd = '-lsr'
+        else:
+            cmd = '-ls'
+
+        try:
+            job = self._hdpm._run_hadoop_cmd('fs', (cmd, path))
+            for line in job.yield_stdout():
+                parsed_line = self._parse_ls_line(line)
+                if parsed_line:
+                    yield parsed_line
+            job.join()
+        except self._hdpm.HadoopRunException:
+            raise self.HadoopFileNotFoundError("ls: '%s': No such file or directory" % path)
+
+    def exists(self, path):
+        """
+        Check if file on the path exists
+
+        :param path: path to the file
+        """
+        try:
+            for _ in self.ls(path):
+                pass
+        except self.HadoopFileNotFoundError:
+            return False
+        return True
