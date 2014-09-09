@@ -1,8 +1,8 @@
 """
-	hadoop-manager
-	~~~~~~~~~~~~~~
+        hadoop-manager
+        ~~~~~~~~~~~~~~
 
-	Python wrapper around Hadoop streaming jar.
+        Python wrapper around Hadoop streaming jar.
 """
 
 __author__ = 'Jure Ham <jure.ham@zemanta.com>'
