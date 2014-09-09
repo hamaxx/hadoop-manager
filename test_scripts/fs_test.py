@@ -8,4 +8,5 @@ with HadoopManager(
                 hadoop_fs_default_name='hdfs://zedoop/',
                 hadoop_job_tracker='hdp01.zemanta.com:8021') as mng:
 
-    mng.fs.ls('/user/ham/*')
+    for f in mng.fs.ls('/user/ham/'):
+        print f
