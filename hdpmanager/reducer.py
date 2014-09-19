@@ -49,9 +49,6 @@ class Reducer(Streamer):
     def _reduce_next_key(self):
         last_key, last_values = self._last_line
 
-        if last_key is _Empty:
-            return
-
         for value in last_values:
             yield value
 
@@ -65,7 +62,6 @@ class Reducer(Streamer):
                 self._last_line = (key, values)
                 return
 
-            last_key = key
             for value in values:
                 yield value
 
@@ -80,12 +76,11 @@ class Reducer(Streamer):
             except StopIteration:
                 return
             else:
-                break
+                return
 
     def parse_input(self):
         self._last_line = _Empty, None
         self._reduce_first_line()
 
         while self._last_line[0] is not _Empty:
-            next_key, next_value = self._last_line
             self._try_reduce(self._last_line[0], self._reduce_next_key())
