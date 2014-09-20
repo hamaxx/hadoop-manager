@@ -22,7 +22,7 @@ class Reducer(Streamer):
         Output can be either returned or yielded as a key, value pair
 
         :param key: key returned by the mapper
-        :param values: list of values retuned by the mapper
+        :param values: generator over values retuned by the mapper for this key
         """
         return key, values
 
