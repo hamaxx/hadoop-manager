@@ -9,7 +9,7 @@ from setuptools import setup
 
 
 setup(name='hadoop-manager',
-        version='0.0.3',
+        version='0.0.4',
         author='Jure Ham',
         license='GPLv3',
         author_email='jure.ham@zemanta.com',
