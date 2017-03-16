@@ -4,19 +4,22 @@ hadoop-manager (alpha)
 Python wrapper around Hadoop streaming jar.
 
 
-###Install:
+Install:
+--------
 
 	pip install hadoop-manager
 
 
-###Docs:
+Docs:
+-----
 
 [Hadoop-manager docs](https://pythonhosted.org/hadoop-manager/)
 
 
-###Examples
+Examples
+--------
 
-####Basic usecase
+__Basic usecase__
 
 	from hdpmanager import HadoopManager
 	from hdpmanager import Mapper
@@ -61,7 +64,7 @@ Python wrapper around Hadoop streaming jar.
 			for l in job.cat_output():
 				print l
 
-####Job chaining
+__Job chaining__
 
 	parent_job_1 = mng.create_job(...)
 	parent_job_2 = mng.create_job(...)
@@ -75,7 +78,7 @@ Python wrapper around Hadoop streaming jar.
 	main_job.run()
 	out = main_job.cat_output()
 
-####Async job execution
+__Async job execution__
 
 	job_1 = mng.create_job(...)
 	job_2 = mng.create_job(...)
